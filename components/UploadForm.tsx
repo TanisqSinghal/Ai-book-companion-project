@@ -13,20 +13,18 @@ import { ACCEPTED_PDF_TYPES, ACCEPTED_IMAGE_TYPES, DEFAULT_VOICE } from '@/lib/c
 import FileUploader from './FileUploader';
 import VoiceSelector from './VoiceSelector';
 import LoadingOverlay from './LoadingOverlay';
-import { useAuth } from '@clerk/nextjs';
+import {useAuth, useUser} from "@clerk/nextjs";
 import { toast } from 'sonner';
-import { set } from 'mongoose';
-import { checkBookExists, createBook, saveBookSegments } from '@/lib/actions/book.actions';
-import { useRouter } from 'next/navigation';
-import { parsePDFFile } from '@/lib/utils';
-import {upload} from '@vercel/blob/client'
-
+import {checkBookExists, createBook, saveBookSegments} from "@/lib/actions/book.actions";
+import {useRouter} from "next/navigation";
+import {parsePDFFile} from "@/lib/utils";
+import {upload} from "@vercel/blob/client";
 
 const UploadForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
-    const {userId} = useAuth();
-    const router = useRouter();
+    const { userId } = useAuth();
+    const router = useRouter()
 
     useEffect(() => {
         setIsMounted(true);
@@ -36,7 +34,7 @@ const UploadForm = () => {
         resolver: zodResolver(UploadSchema),
         defaultValues: {
             title: '',
-            author: '', 
+            author: '',
             persona: '',
             pdfFile: undefined,
             coverImage: undefined,
@@ -44,20 +42,21 @@ const UploadForm = () => {
     });
 
     const onSubmit = async (data: BookUploadFormValues) => {
-
         if(!userId) {
-            return toast.error("You must be logged in to upload a book.");
+           return toast.error("Please login to upload books");
         }
 
         setIsSubmitting(true);
-        
+
+        // PostHog -> Track Book Uploads...
+
         try {
             const existsCheck = await checkBookExists(data.title);
 
             if(existsCheck.exists && existsCheck.book) {
-                toast.info("A book with this title already exists. Please choose a different title.");
-                form.reset();
-                router.push(`/books/${existsCheck.book.slug}`);
+                toast.info("Book with same title already exists.");
+                form.reset()
+                router.push(`/books/${existsCheck.book.slug}`)
                 return;
             }
 
@@ -67,16 +66,15 @@ const UploadForm = () => {
             const parsedPDF = await parsePDFFile(pdfFile);
 
             if(parsedPDF.content.length === 0) {
-                toast.error("Failed to parse PDF file. Please make sure the file is a valid PDF and try again.");
-
+                toast.error("Failed to parse PDF. Please try again with a different file.");
                 return;
             }
 
             const uploadedPdfBlob = await upload(fileTitle, pdfFile, {
                 access: 'public',
                 handleUploadUrl: '/api/upload',
-                contentType: 'application/pdf',
-            })
+                contentType: 'application/pdf'
+            });
 
             let coverUrl: string;
 
@@ -85,19 +83,18 @@ const UploadForm = () => {
                 const uploadedCoverBlob = await upload(`${fileTitle}_cover.png`, coverFile, {
                     access: 'public',
                     handleUploadUrl: '/api/upload',
-                    contentType: coverFile.type,
+                    contentType: coverFile.type
                 });
                 coverUrl = uploadedCoverBlob.url;
             } else {
-                const reponse = await fetch(parsedPDF.cover);
-                const blob = await reponse.blob();
+                const response = await fetch(parsedPDF.cover)
+                const blob = await response.blob();
 
                 const uploadedCoverBlob = await upload(`${fileTitle}_cover.png`, blob, {
                     access: 'public',
                     handleUploadUrl: '/api/upload',
-                    contentType: 'image/png',
+                    contentType: 'image/png'
                 });
-
                 coverUrl = uploadedCoverBlob.url;
             }
 
@@ -110,30 +107,36 @@ const UploadForm = () => {
                 fileBlobKey: uploadedPdfBlob.pathname,
                 coverURL: coverUrl,
                 fileSize: pdfFile.size,
-            })
+            });
 
-            if(!book.success) throw new Error("Failed to create book");
+            // if(!book.success) {
+            //     toast.error(book.error as string || "Failed to create book");
+            //     if (book.isBillingError) {
+            //         router.push("/subscriptions");
+            //     }
+            //     return;
+            // }
 
             if(book.alreadyExists) {
-                toast.info("A book with this title already exists.");
-                form.reset();
-                router.push(`/books/${existsCheck.book.slug}`);
+                toast.info("Book with same title already exists.");
+                form.reset()
+                router.push(`/books/${book.data.slug}`)
                 return;
             }
 
             const segments = await saveBookSegments(book.data._id, userId, parsedPDF.content);
 
             if(!segments.success) {
-                toast.error("Failed to save book segments.");
+                toast.error("Failed to save book segments");
                 throw new Error("Failed to save book segments");
             }
 
             form.reset();
             router.push('/');
+        } catch (error) {
+            console.error(error);
 
-        } catch (e) {
-            console.error("Error uploading book:", e);
-            toast.error("An error occurred while uploading the book. Please try again.");
+            toast.error("Failed to upload book. Please try again later.");
         } finally {
             setIsSubmitting(false);
         }
