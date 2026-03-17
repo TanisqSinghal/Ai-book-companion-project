@@ -4,6 +4,7 @@ import { ClerkProvider, SignInButton, SignUpButton, Show, UserButton } from "@cl
 
 import "./globals.css";
 import Navbar from "@/components/ui/Navbar";
+import { Toaster } from "@/components/ui/sonner";
 
 const ibmPlexSerif = IBM_Plex_Serif({
   variable: "--font-ibm-plex-serif",
@@ -29,15 +30,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${ibmPlexSerif.variable} ${monaSans.variable} relative font-sans antialiased`}
-      >
-        <ClerkProvider>
-          <Navbar />
-          {children}
-        </ClerkProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body
+          className={`${ibmPlexSerif.variable} ${monaSans.variable} relative font-sans antialiased`}
+        >
+          
+            <Navbar />
+            {children}
+          <Toaster />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
