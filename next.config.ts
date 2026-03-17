@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
     {
       protocol: "https",
       hostname: "covers.openlibrary.org"
+    },
+    {
+      protocol: "https",
+      hostname: "l3qh83ekcgu9vmmg.public.blob.vercel-storage.com"
     }
   ]}
 };
