@@ -16,7 +16,7 @@ const VapiControls = ({ book }: { book: IBook }) => {
         duration,
         start,
         stop,
-        clearErros } = useVapi(book);
+         } = useVapi(book); //removes clearError
 
     const isAiThinkingOrSpeaking = isActive && (status === "thinking" || status === "speaking");
 
