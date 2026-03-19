@@ -134,16 +134,24 @@ Ai-book-companion-project/
 ## 📸 Screenshots
 
 ### Home Page
-! [Home Page](./public/screenshots/homepage.jpg)
+<p align="center">
+  <img src="./public/screenshots/home.png" width="100%" />
+</p>
 
 ### Upload Book
-! [Upload Book](./public/screenshots/uploadbook.jpg)
+<p align="center">
+  <img src="./public/screenshots/uploadbook.jpg" width="100%" />
+</p>
 
 ### Book Interaction
-! [Book Interaction](./public/screenshots/interacting.jpg)
+<p align="center">
+  <img src="./public/screenshots/interacting.jpg" width="100%" />
+</p>
 
 ### Subscriptions
-! [Subscriptions](./public/screenshots/subscriptions.jpg)
+<p align="center">
+  <img src="./public/screenshots/subscriptions.jpg" width="100%" />
+</p>
 
 ## 🔐 Key Concepts Implemented
 
