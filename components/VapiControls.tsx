@@ -5,8 +5,27 @@ import useVapi from "@/hooks/useVapi";
 import { IBook } from "@/types";
 import Image from "next/image";
 import Transcript from "@/components/Transcript";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+const formatDuration = (totalSeconds: number) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+};
+
+const STATUS_LABELS = {
+    idle: 'Ready',
+    connecting: 'Connecting',
+    starting: 'Starting',
+    listening: 'Listening',
+    thinking: 'Thinking',
+    speaking: 'Speaking',
+} as const;
 
 const VapiControls = ({ book }: { book: IBook }) => {
+    const router = useRouter();
 
     const { status,
         isActive,
@@ -14,11 +33,21 @@ const VapiControls = ({ book }: { book: IBook }) => {
         currentMessage,
         currentUserMessage,
         duration,
+        maxDurationSeconds,
         start,
         stop,
-        clearError } = useVapi(book); //removes clearError
+        didHitSessionLimit,
+        limitError,
+    } = useVapi(book);
+
+    useEffect(() => {
+        if (didHitSessionLimit) {
+            router.replace('/');
+        }
+    }, [didHitSessionLimit, router]);
 
     const isAiThinkingOrSpeaking = isActive && (status === "thinking" || status === "speaking");
+    const statusDotClass = `vapi-status-dot-${status === 'idle' ? 'ready' : status}`;
 
     return (
         <>
@@ -57,8 +86,8 @@ const VapiControls = ({ book }: { book: IBook }) => {
 
                     <div className="mt-1 flex flex-wrap gap-2">
                         <div className="vapi-status-indicator">
-                            <span className="vapi-status-dot vapi-status-dot-ready" />
-                            <span className="vapi-status-text">Ready</span>
+                            <span className={`vapi-status-dot ${statusDotClass}`} />
+                            <span className="vapi-status-text">{STATUS_LABELS[status]}</span>
                         </div>
 
                         <div className="vapi-status-indicator">
@@ -66,11 +95,17 @@ const VapiControls = ({ book }: { book: IBook }) => {
                         </div>
 
                         <div className="vapi-status-indicator">
-                            <span className="vapi-status-text">0:00/15:00</span>
+                            <span className="vapi-status-text">{formatDuration(duration)}/{formatDuration(maxDurationSeconds)}</span>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {limitError && (
+                <div className="warning-banner" role="alert">
+                    <p className="warning-banner-text">{limitError}</p>
+                </div>
+            )}
 
             <div className="vapi-transcript-wrapper">
                 <Transcript

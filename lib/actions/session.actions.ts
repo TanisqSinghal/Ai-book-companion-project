@@ -4,26 +4,58 @@ import VoiceSession from "@/database/models/voice-session.model";
 import { connectToDatabase } from "@/database/mongoose";
 import { EndSessionResult, StartSessionResult } from "@/types";
 import { getCurrentBillingPeriodStart } from "@/lib/subscriptions-constants";
+import { getCurrentUserSubscription } from "@/lib/subscription.server";
 
 
 export const startVoiceSession = async (clerkId: string, bookId: string): Promise<StartSessionResult> => {
     try {
         await connectToDatabase();
 
-        //Limits/Plan to see whether a session is allowed 
+        const { userId, limits, plan } = await getCurrentUserSubscription();
+
+        if (!userId) {
+            return {
+                success: false,
+                error: 'Please sign in to start a voice session.',
+            }
+        }
+
+        if (clerkId !== userId) {
+            return {
+                success: false,
+                error: 'Unauthorized session request.',
+            }
+        }
+
+        const billingPeriodStart = getCurrentBillingPeriodStart();
+
+        if (limits.maxSessionsPerMonth !== null) {
+            const sessionsThisMonth = await VoiceSession.countDocuments({
+                clerkId: userId,
+                billingPeriodStart,
+            });
+
+            if (sessionsThisMonth >= limits.maxSessionsPerMonth) {
+                return {
+                    success: false,
+                    error: `You have reached your ${plan} plan limit (${limits.maxSessionsPerMonth} sessions this month). Upgrade to continue.`,
+                    isBillingError: true,
+                }
+            }
+        }
 
         const session = await VoiceSession.create({
-            clerkId, 
+            clerkId: userId,
             bookId, 
-            startAt: new Date(),
-            billingPeriodStart: getCurrentBillingPeriodStart(),
+            startedAt: new Date(),
+            billingPeriodStart,
             durationSeconds: 0,
         });
 
         return {
             success: true,
             sessionId: session._id.toString(),
-            // maxDurationMinutes, // Example value, replace with actual plan limit
+            maxDurationMinutes: limits.maxSessionMinutes,
 
         }
     } catch (e) {
