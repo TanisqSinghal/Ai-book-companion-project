@@ -49,74 +49,75 @@ LibroAI is a full-stack AI application that transforms static books into **inter
 ---
 
 ## 📂 Project Structure
+
+```bash
 Ai-book-companion-project/
 │
-├── app/                         # Next.js App Router
+├── app/
 │   ├── api/
 │   │   └── upload/
-│   │       └── route.ts         # Vercel Blob upload handler
+│   │       └── route.ts              # Vercel Blob upload handler
 │   │
 │   ├── books/
 │   │   ├── [slug]/
-│   │   │   └── page.tsx         # Book interaction page
+│   │   │   └── page.tsx              # Book interaction page
 │   │   └── new/
-│   │       └── page.tsx         # Upload new book page
+│   │       └── page.tsx              # Upload new book page
 │   │
 │   ├── subscriptions/
-│   │   └── page.tsx             # Pricing / subscription page
+│   │   └── page.tsx                  # Pricing page
 │   │
-│   ├── layout.tsx               # Root layout (ClerkProvider, Navbar)
-│   ├── page.tsx                 # Home page
-│   └── globals.css              # Global styles
+│   ├── layout.tsx                    # Root layout (ClerkProvider, Navbar)
+│   ├── page.tsx                      # Home page
+│   └── globals.css                   # Global styles
 │
-├── components/                  # Reusable UI components
+├── components/
 │   ├── ui/
 │   │   ├── Navbar.tsx
 │   │   ├── Button.tsx
 │   │   ├── Input.tsx
 │   │   ├── Form.tsx
-│   │   └── sonner.tsx           # Toast notifications
+│   │   └── sonner.tsx                # Toast notifications
 │   │
-│   ├── FileUploader.tsx         # PDF/Image upload component
-│   ├── VoiceSelector.tsx        # Voice/persona selection
-│   ├── LoadingOverlay.tsx       # Loader during upload
-│   └── UploadForm.tsx           # Main upload form logic
+│   ├── FileUploader.tsx
+│   ├── VoiceSelector.tsx
+│   ├── LoadingOverlay.tsx
+│   └── UploadForm.tsx
 │
-├── hooks/                       # Custom React hooks
-│   ├── useVapi.ts               # Voice session logic (Vapi integration)
-│   └── useLatestRef.ts          # Persistent ref helper
+├── hooks/
+│   ├── useVapi.ts                    # Voice session logic
+│   └── useLatestRef.ts
 │
-├── lib/                         # Core logic & utilities
+├── lib/
 │   ├── actions/
-│   │   ├── book.actions.ts      # Book CRUD + segmentation
-│   │   └── session.actions.ts   # Voice session handling
+│   │   ├── book.actions.ts
+│   │   └── session.actions.ts
 │   │
 │   ├── database/
-│   │   └── mongoose.ts          # MongoDB connection setup
+│   │   └── mongoose.ts
 │   │
-│   ├── utils.ts                 # Helpers (slug, PDF parsing, etc.)
-│   ├── constants.ts             # App constants (limits, voice, etc.)
-│   └── zod.ts                   # Validation schemas
+│   ├── utils.ts
+│   ├── constants.ts
+│   └── zod.ts
 │
-├── models/ (or database/models/)
-│   ├── Book.ts                  # Book schema
-│   └── BookSegment.ts           # Segmented content schema
+├── models/
+│   ├── Book.ts
+│   └── BookSegment.ts
 │
-├── types/                       # TypeScript types
-│   ├── index.ts
-│   └── custom types (Book, Messages, etc.)
+├── types/
+│   └── index.ts
 │
-├── public/                      # Static assets
+├── public/
 │   ├── assets/
-│   │   └── book-cover.svg
-│   └── screenshots/             # (for README images)
+│   └── screenshots/
 │
-├── .env.local                   # Local environment variables
-├── next.config.ts               # Next.js config
-├── tailwind.config.ts           # Tailwind CSS config
-├── tsconfig.json                # TypeScript config
-├── package.json                 # Dependencies
+├── .env.local
+├── next.config.ts
+├── tailwind.config.ts
+├── tsconfig.json
+├── package.json
 └── README.md
+```
 
 ## 🧪 How It Works
 
@@ -133,16 +134,16 @@ Ai-book-companion-project/
 ## 📸 Screenshots
 
 ### Home Page
-! [Home Page](homepage.jpg)
+! [Home Page](./public/screenshots/homepage.jpg)
 
 ### Upload Book
-! [Upload Book](uploadbook.jpg)
+! [Upload Book](./public/screenshots/uploadbook.jpg)
 
 ### Book Interaction
-! [Book Interaction](interacting.jpg)
+! [Book Interaction](./public/screenshots/interacting.jpg)
 
 ### Subscriptions
-! [Subscriptions](subscriptions.jpg)
+! [Subscriptions](./public/screenshots/subscriptions.jpg)
 
 ## 🔐 Key Concepts Implemented
 
