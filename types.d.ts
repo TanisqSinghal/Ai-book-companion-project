@@ -4,6 +4,7 @@ import { Control, FieldPath, FieldValues } from 'react-hook-form';
 import { LucideIcon } from 'lucide-react';
 import z from 'zod';
 import { UploadSchema } from '@/lib/zod';
+import { PlanType } from '@/lib/subscriptions-constants';
 
 // ============================================
 // DATABASE MODELS
@@ -131,6 +132,14 @@ export interface StartSessionResult {
     sessionId?: string;
     maxDurationMinutes?: number;
     error?: string;
+    isBillingError?: boolean;
+}
+
+export interface CreateBookResult {
+    success: boolean;
+    data?: IBook;
+    alreadyExists?: boolean;
+    error?: string | unknown;
     isBillingError?: boolean;
 }
 

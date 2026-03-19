@@ -9,11 +9,11 @@ import { BookUploadFormValues } from '@/types';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ACCEPTED_PDF_TYPES, ACCEPTED_IMAGE_TYPES, DEFAULT_VOICE } from '@/lib/constants';
+import { ACCEPTED_PDF_TYPES, ACCEPTED_IMAGE_TYPES } from '@/lib/constants';
 import FileUploader from './FileUploader';
 import VoiceSelector from './VoiceSelector';
 import LoadingOverlay from './LoadingOverlay';
-import {useAuth, useUser} from "@clerk/nextjs";
+import {useAuth} from "@clerk/nextjs";
 import { toast } from 'sonner';
 import {checkBookExists, createBook, saveBookSegments} from "@/lib/actions/book.actions";
 import {useRouter} from "next/navigation";
@@ -109,18 +109,27 @@ const UploadForm = () => {
                 fileSize: pdfFile.size,
             });
 
-            // if(!book.success) {
-            //     toast.error(book.error as string || "Failed to create book");
-            //     if (book.isBillingError) {
-            //         router.push("/subscriptions");
-            //     }
-            //     return;
-            // }
+            if(!book.success) {
+                toast.error(book.error as string || "Failed to create book");
+                if (book.isBillingError) {
+                    router.push("/subscriptions");
+                }
+                return;
+            }
 
             if(book.alreadyExists) {
+                if(!book.data) {
+                    toast.error("Failed to resolve existing book details.");
+                    return;
+                }
                 toast.info("Book with same title already exists.");
                 form.reset()
                 router.push(`/books/${book.data.slug}`)
+                return;
+            }
+
+            if(!book.data) {
+                toast.error("Failed to create book");
                 return;
             }
 

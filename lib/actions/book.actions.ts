@@ -1,19 +1,31 @@
 'use server'
 
 import { connectToDatabase } from "@/database/mongoose";
-import { CreateBook, TextSegment } from "@/types";
+import { CreateBook, CreateBookResult, TextSegment } from "@/types";
 import { escapeRegex, generateSlug, serializeData } from "@/lib/utils";
 import Book from "@/database/models/book.model";
 import BookSegment from "@/database/models/book-segment.model";
 import mongoose from "mongoose";
 import { revalidatePath } from "next/cache";
+import { getCurrentUserSubscription } from "@/lib/subscription.server";
 
 
-export const getAllBooks = async () => {
+export const getAllBooks = async (query?: string) => {
     try {
         await connectToDatabase();
 
-        const books = await Book.find().sort({ createdAt: -1 }).lean();
+        const trimmedQuery = query?.trim();
+
+        const filter = trimmedQuery
+            ? {
+                $or: [
+                    { title: { $regex: escapeRegex(trimmedQuery), $options: 'i' } },
+                    { author: { $regex: escapeRegex(trimmedQuery), $options: 'i' } },
+                ],
+            }
+            : {};
+
+        const books = await Book.find(filter).sort({ createdAt: -1 }).lean();
 
         return {
             success: true,
@@ -55,9 +67,19 @@ export const checkBookExists = async (title: string) => {
     }
 }
 
-export const createBook = async (data: CreateBook) => {
+export const createBook = async (data: CreateBook): Promise<CreateBookResult> => {
     try {
         await connectToDatabase();
+
+        const { userId, plan, limits } = await getCurrentUserSubscription();
+
+        if (!userId) {
+            return {
+                success: false,
+                error: 'Please sign in to upload books.',
+                isBillingError: false,
+            }
+        }
 
         const slug = generateSlug(data.title);
 
@@ -71,10 +93,19 @@ export const createBook = async (data: CreateBook) => {
             }
         }
 
-        //Todo: Check subscription limits before creating a book
+        const totalBooks = await Book.countDocuments({ clerkId: userId });
+
+        if (totalBooks >= limits.maxBooks) {
+            return {
+                success: false,
+                error: `You have reached the ${plan} plan limit (${limits.maxBooks} books). Upgrade your plan to upload more books.`,
+                isBillingError: true,
+            }
+        }
 
         const book = await Book.create({
             ...data,
+            clerkId: userId,
             slug,
             totalSegments: 0,
         })
