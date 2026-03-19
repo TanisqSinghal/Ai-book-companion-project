@@ -135,7 +135,7 @@ Ai-book-companion-project/
 
 ### Home Page
 <p align="center">
-  <img src="./public/screenshots/home.png" width="100%" />
+  <img src="./public/screenshots/homepage.jpg" width="100%" />
 </p>
 
 ### Upload Book
