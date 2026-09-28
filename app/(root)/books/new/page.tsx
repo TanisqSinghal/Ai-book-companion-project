@@ -9,7 +9,6 @@ const page = () => {
                     <p className="subtitle"> Upload a pdf to generate your interactive interview</p>
 
                 </section>
-
                 <UploadForm />
             </div>
         </main>
