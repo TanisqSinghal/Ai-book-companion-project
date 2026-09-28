@@ -30,7 +30,14 @@ const page = async ({ searchParams }: HomePageProps) => {
 
       <div className="library-books-grid">
         {books.map((book) => (
-          <BookCard key={book._id} title={book.title} author={book.author} coverURL={book.coverURL} slug={book.slug} />
+          <BookCard
+            key={book._id}
+            title={book.title}
+            author={book.author}
+            coverURL={book.coverURL}
+            fileURL={book.fileURL}
+            slug={book.slug}
+          />
         ))}
       </div>
     </main>

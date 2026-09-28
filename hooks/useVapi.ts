@@ -1,7 +1,5 @@
 'use client';
 
-// Create hooks/useVapi.ts: the core hook. Initializes Vapi SDK, manages call lifecycle (idle, connecting, starting, listening, thinking, speaking), tracks messages array + currentMessage streaming, handles duration timer with maxDuration enforcement, session tracking via server actions
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Vapi from '@vapi-ai/web';
 import { useAuth } from '@clerk/nextjs';
@@ -36,6 +34,12 @@ function getVapi() {
     }
     return vapi;
 }
+
+const getConfigurationError = () => {
+    if (!VAPI_API_KEY) return 'Vapi is not configured. Add NEXT_PUBLIC_VAPI_API_KEY and try again.';
+    if (!ASSISTANT_ID) return 'Vapi assistant is not configured. Add NEXT_PUBLIC_ASSISTANT_ID and try again.';
+    return null;
+};
 
 export type CallStatus = 'idle' | 'connecting' | 'starting' | 'listening' | 'thinking' | 'speaking';
 
@@ -211,29 +215,40 @@ export function useVapi(book: IBook) {
 
                 startTimeRef.current = null;
             },
+
+            'call-start-failed': (event: { error?: string }) => {
+                const message = event.error || 'Vapi could not start the call.';
+                console.error('Vapi call start failed:', message);
+                setStatus('idle');
+                setLimitError(message);
+            },
         };
 
-        // Register all handlers
+        const configurationError = getConfigurationError();
+        if (configurationError) return;
+
+        const client = getVapi();
+        const cleanupDurationRef = durationRef;
         Object.entries(handlers).forEach(([event, handler]) => {
-            getVapi().on(event as keyof typeof handlers, handler as () => void);
+            client.on(event as keyof typeof handlers, handler as () => void);
         });
 
         return () => {
             // End active session on unmount
             if (sessionIdRef.current) {
-                getVapi().stop();
-                endVoiceSession(sessionIdRef.current, durationRef.current).catch((err) =>
+                client.stop();
+                endVoiceSession(sessionIdRef.current, cleanupDurationRef.current).catch((err) =>
                     console.error('Failed to end voice session on unmount:', err),
                 );
                 sessionIdRef.current = null;
             }
             // Cleanup handlers
             Object.entries(handlers).forEach(([event, handler]) => {
-                getVapi().off(event as keyof typeof handlers, handler as () => void);
+                client.off(event as keyof typeof handlers, handler as () => void);
             });
             if (timerRef.current) clearInterval(timerRef.current);
         };
-    }, []);
+    }, [durationRef, maxDurationRef]);
 
     const start = useCallback(async () => {
         if (!userId) {
@@ -246,6 +261,9 @@ export function useVapi(book: IBook) {
         setStatus('connecting');
 
         try {
+            const configurationError = getConfigurationError();
+            if (configurationError) throw new Error(configurationError);
+
             // Check session limits and create session record
             const result = await startVoiceSession(userId, book._id);
 
@@ -291,7 +309,7 @@ export function useVapi(book: IBook) {
             setStatus('idle');
             setLimitError('Failed to start voice session. Please try again.');
         }
-    }, [book._id, book.title, book.author, voice, userId]);
+    }, [book._id, book.title, book.author, limits.maxSessionMinutes, voice, userId]);
 
     const stop = useCallback(() => {
         isStoppingRef.current = true;

@@ -1,6 +1,5 @@
 import { getBookBySlug } from "@/lib/actions/book.actions";
-import { ArrowLeft, Mic, MicOff } from "lucide-react";
-import Image from "next/image";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
@@ -26,8 +25,6 @@ const page = async ({ params }: BookPageProps) => {
     if (!result.success || !result.data) {
         redirect('/');
     }
-
-    const { title, author, coverURL, persona } = result.data;
 
     const book = result.data;
 

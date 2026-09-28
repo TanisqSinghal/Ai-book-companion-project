@@ -43,7 +43,8 @@ function parseArgs(args: unknown): Record<string, unknown> {
     if (typeof args === 'string') {
         try { return JSON.parse(args); } catch { return {}; }
     }
-    return args as Record<string, unknown>;
+    if (typeof args === 'object') return args as Record<string, unknown>;
+    return {};
 }
 
 export async function POST(request: Request) {
@@ -70,7 +71,7 @@ export async function POST(request: Request) {
         }
 
         // Handle toolCallList format (array of calls)
-        if (!toolCallList || toolCallList.length === 0) {
+        if (!Array.isArray(toolCallList) || toolCallList.length === 0) {
             return NextResponse.json({
                 results: [{ result: 'No tool calls found' }],
             });
@@ -79,15 +80,15 @@ export async function POST(request: Request) {
         const results = [];
 
         for (const toolCall of toolCallList) {
-            const { id, function: func } = toolCall;
+            const { id, toolCallId, function: func } = toolCall;
             const name = func?.name;
             const args = parseArgs(func?.arguments);
 
             if (name === 'searchBook') {
                 const searchResult = await processBookSearch(args.bookId, args.query);
-                results.push({ toolCallId: id, ...searchResult });
+                results.push({ toolCallId: toolCallId || id, ...searchResult });
             } else {
-                results.push({ toolCallId: id, result: `Unknown function: ${name}` });
+                results.push({ toolCallId: toolCallId || id, result: `Unknown function: ${name}` });
             }
         }
 

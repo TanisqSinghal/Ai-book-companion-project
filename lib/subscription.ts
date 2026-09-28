@@ -7,16 +7,14 @@ import {
 
 type HasAuthorization = (params: { plan: string }) => boolean;
 
-const toClerkUserPlan = (planSlug: string) => `user:${planSlug}`;
-
 export const getPlanFromHas = (has?: HasAuthorization): PlanType => {
     if (!has) return 'free';
 
-    if (has({ plan: toClerkUserPlan(SUBSCRIPTION_PLAN_SLUGS.pro) })) {
+    if (has({ plan: SUBSCRIPTION_PLAN_SLUGS.pro })) {
         return 'pro';
     }
 
-    if (has({ plan: toClerkUserPlan(SUBSCRIPTION_PLAN_SLUGS.standard) })) {
+    if (has({ plan: SUBSCRIPTION_PLAN_SLUGS.standard })) {
         return 'standard';
     }
 

@@ -79,6 +79,7 @@ export interface BookCardProps {
     title: string;
     author: string;
     coverURL: string;
+    fileURL: string;
     slug: string;
 }
 

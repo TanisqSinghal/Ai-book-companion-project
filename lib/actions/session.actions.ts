@@ -5,6 +5,7 @@ import { connectToDatabase } from "@/database/mongoose";
 import { EndSessionResult, StartSessionResult } from "@/types";
 import { getCurrentBillingPeriodStart } from "@/lib/subscriptions-constants";
 import { getCurrentUserSubscription } from "@/lib/subscription.server";
+import { auth } from "@clerk/nextjs/server";
 
 
 export const startVoiceSession = async (clerkId: string, bookId: string): Promise<StartSessionResult> => {
@@ -71,8 +72,13 @@ export const endVoiceSession = async (sessionId: string, durationSeconds: number
     try {
         await connectToDatabase();
 
+        const { userId } = await auth();
+        if (!userId) {
+            return { success: false, error: "Please sign in to end a voice session." };
+        }
+
         const endedSession = await VoiceSession.findByIdAndUpdate(
-            sessionId,
+            { _id: sessionId, clerkId: userId },
             {
                 endedAt: new Date(),
                 durationSeconds,

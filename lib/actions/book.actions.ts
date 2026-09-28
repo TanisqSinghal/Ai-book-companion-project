@@ -8,6 +8,7 @@ import BookSegment from "@/database/models/book-segment.model";
 import mongoose from "mongoose";
 import { revalidatePath } from "next/cache";
 import { getCurrentUserSubscription } from "@/lib/subscription.server";
+import { auth } from "@clerk/nextjs/server";
 
 
 export const getAllBooks = async (query?: string) => {
@@ -129,6 +130,11 @@ export const createBook = async (data: CreateBook): Promise<CreateBookResult> =>
 export const saveBookSegments = async (bookId: string, clerkId: string, segments: TextSegment[]) => {
     try {
         await connectToDatabase();
+
+        const { userId } = await auth();
+        if (!userId || userId !== clerkId) {
+            return { success: false, error: 'Unauthorized request.' };
+        }
 
         console.log("saving book segments...");
 

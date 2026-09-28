@@ -678,7 +678,6 @@
   .book-card-author {
     @apply text-sm md:text-base font-medium text-[#3d485e] line-clamp-1;
   }
-
   /* ===========================================
      UPLOAD FORM COMPONENT
      =========================================== */
