@@ -5,7 +5,7 @@ import { useController, FieldValues } from 'react-hook-form';
 import { X } from 'lucide-react';
 import { FileUploadFieldProps } from '@/types';
 import { cn } from '@/lib/utils';
-import { FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { FormItem, FormLabel, FormControl } from '@/components/ui/form';
 
 const FileUploader = <T extends FieldValues>({
     control,
@@ -19,6 +19,7 @@ const FileUploader = <T extends FieldValues>({
 }: FileUploadFieldProps<T>) => {
     const {
         field: { onChange, value },
+        fieldState: { error },
     } = useController({ name, control });
 
     const inputRef = useRef<HTMLInputElement>(null);
@@ -36,7 +37,9 @@ const FileUploader = <T extends FieldValues>({
     const onRemove = useCallback(
         (e: React.MouseEvent) => {
             e.stopPropagation();
-            onChange(null);
+            // Optional file fields must return to `undefined` so the form schema
+            // treats a removed cover as empty instead of an invalid value.
+            onChange(undefined);
             if (inputRef.current) {
                 inputRef.current.value = '';
             }
@@ -86,7 +89,11 @@ const FileUploader = <T extends FieldValues>({
                     )}
                 </div>
             </FormControl>
-            <FormMessage />
+            {error?.message && (
+                <p className="text-sm text-destructive" role="alert">
+                    {error.message}
+                </p>
+            )}
         </FormItem>
     );
 };

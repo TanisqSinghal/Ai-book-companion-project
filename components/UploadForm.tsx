@@ -9,7 +9,7 @@ import { BookUploadFormValues } from '@/types';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ACCEPTED_PDF_TYPES, ACCEPTED_IMAGE_TYPES } from '@/lib/constants';
+import { ACCEPTED_PDF_TYPES, ACCEPTED_IMAGE_TYPES, DEFAULT_VOICE } from '@/lib/constants';
 import FileUploader from './FileUploader';
 import VoiceSelector from './VoiceSelector';
 import LoadingOverlay from './LoadingOverlay';
@@ -23,7 +23,7 @@ import {upload} from "@vercel/blob/client";
 const UploadForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
-    const { userId } = useAuth();
+    const { userId, isLoaded, isSignedIn } = useAuth();
     const router = useRouter()
 
     useEffect(() => {
@@ -35,15 +35,22 @@ const UploadForm = () => {
         defaultValues: {
             title: '',
             author: '',
-            persona: '',
+            persona: DEFAULT_VOICE,
             pdfFile: undefined,
             coverImage: undefined,
         },
     });
 
     const onSubmit = async (data: BookUploadFormValues) => {
-        if(!userId) {
-           return toast.error("Please login to upload books");
+        if (!isLoaded) {
+            toast.info("Checking your sign-in status. Please try again in a moment.");
+            return;
+        }
+
+        if (!isSignedIn || !userId) {
+            toast.error("Please sign in to upload books.");
+            router.push("/sign-in?redirect_url=/books/new");
+            return;
         }
 
         setIsSubmitting(true);
@@ -159,7 +166,28 @@ const UploadForm = () => {
 
             <div className="new-book-wrapper">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                            const firstError = Object.entries(errors)[0];
+
+                            if (firstError) {
+                                const [field, error] = firstError;
+                                const labels: Record<string, string> = {
+                                    title: 'Title',
+                                    author: 'Author name',
+                                    persona: 'Assistant voice',
+                                    pdfFile: 'Book PDF file',
+                                    coverImage: 'Cover image',
+                                };
+                                const message = error?.message;
+                                toast.error(`${labels[field] ?? field}: ${typeof message === 'string' ? message : 'Please check this field.'}`);
+                                return;
+                            }
+
+                            toast.error('Please check the highlighted fields and try again.');
+                        })}
+                        className="space-y-8"
+                    >
                         {/* 1. PDF File Upload */}
                         <FileUploader
                             control={form.control}
