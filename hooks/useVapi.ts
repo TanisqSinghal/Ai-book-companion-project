@@ -62,6 +62,8 @@ export function useVapi(book: IBook) {
     const startTimeRef = useRef<number | null>(null);
     const sessionIdRef = useRef<string | null>(null);
     const isStoppingRef = useRef(false);
+    // Assistant loudness (0-1), kept in a ref so the 3D stage can read it per frame
+    const assistantVolumeRef = useRef(0);
 
     // Keep refs in sync with latest values for use in callbacks
     const maxDurationRef = useLatestRef(maxDurationSeconds);
@@ -110,6 +112,7 @@ export function useVapi(book: IBook) {
                 setStatus('idle');
                 setCurrentMessage('');
                 setCurrentUserMessage('');
+                assistantVolumeRef.current = 0;
 
                 // Stop timer
                 if (timerRef.current) {
@@ -138,6 +141,10 @@ export function useVapi(book: IBook) {
                     // After AI finishes speaking, user can talk
                     setStatus('listening');
                 }
+            },
+
+            'volume-level': (volume: number) => {
+                assistantVolumeRef.current = volume;
             },
 
             message: (message: {
@@ -340,6 +347,7 @@ export function useVapi(book: IBook) {
         currentUserMessage,
         duration,
         maxDurationSeconds,
+        assistantVolumeRef,
         start,
         stop,
         limitError,

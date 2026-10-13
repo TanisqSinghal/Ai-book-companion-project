@@ -1,12 +1,21 @@
 'use client';
 
-import { Mic, MicOff } from "lucide-react";
+import { Bot, Mic, PhoneOff, User } from "lucide-react";
+import dynamic from "next/dynamic";
 import useVapi from "@/hooks/useVapi";
+import useMicLevel from "@/hooks/useMicLevel";
+import { getVoice } from "@/lib/utils";
 import { IBook } from "@/types";
 import Image from "next/image";
 import Transcript from "@/components/Transcript";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+
+// WebGL only exists in the browser, so the 3D stage is never server-rendered
+const ConversationStage = dynamic(() => import("@/components/stage/ConversationStage"), {
+    ssr: false,
+    loading: () => <p className="stage-fallback">Setting the stage…</p>,
+});
 
 const formatDuration = (totalSeconds: number) => {
     const minutes = Math.floor(totalSeconds / 60);
@@ -34,11 +43,14 @@ const VapiControls = ({ book }: { book: IBook }) => {
         currentUserMessage,
         duration,
         maxDurationSeconds,
+        assistantVolumeRef,
         start,
         stop,
         didHitSessionLimit,
         limitError,
     } = useVapi(book);
+
+    const micLevelRef = useMicLevel(isActive);
 
     useEffect(() => {
         if (didHitSessionLimit) {
@@ -46,60 +58,109 @@ const VapiControls = ({ book }: { book: IBook }) => {
         }
     }, [didHitSessionLimit, router]);
 
-    const isAiThinkingOrSpeaking = isActive && (status === "thinking" || status === "speaking");
     const statusDotClass = `vapi-status-dot-${status === 'idle' ? 'ready' : status}`;
+    const voiceName = getVoice(book.persona).name;
+
+    const lastAssistantMessage = messages.findLast((message) => message.role === 'assistant')?.content;
+    const lastUserMessage = messages.findLast((message) => message.role === 'user')?.content;
+    const aiCaption =
+        currentMessage ||
+        lastAssistantMessage ||
+        (status === 'idle' ? `Tap the mic and let's talk about ${book.title}.` : 'One moment…');
+    const userCaption = currentUserMessage || lastUserMessage;
+
+    const isAiTurn = status === 'speaking' || status === 'thinking';
+    const isUserTurn = status === 'listening';
 
     return (
         <>
-
-            <div className="vapi-header-card">
-                <div className="vapi-cover-wrapper">
-                    <Image
-                        src={book.coverURL || '/assets/book-cover.svg'}
-                        alt={book.title}
-                        width={120}
-                        height={180}
-                        className="vapi-cover-image !w-[120px] !h-[180px]"
+            <section className="stage-shell" aria-label={`Voice conversation about ${book.title}`}>
+                <div className="stage-canvas">
+                    <ConversationStage
+                        status={status}
+                        aiLevel={assistantVolumeRef}
+                        userLevel={micLevelRef}
+                        userSpeaking={currentUserMessage.trim().length > 0}
+                        coverURL={book.coverURL}
                     />
-
-                    <div className="vapi-mic-wrapper">
-                        {isAiThinkingOrSpeaking && <span className="vapi-pulse-ring" aria-hidden="true" />}
-                        <button
-                            onClick={isActive ? stop : start}
-                            disabled={status === 'connecting'}
-                            type="button"
-                            className={`vapi-mic-btn !w-[60px] !h-[60px] ${isActive ? 'vapi-mic-btn-active' : 'vapi-mic-btn-inactive'}`}
-                            aria-label={isActive ? "Disable microphone" : "Enable microphone"}
-                        >
-                            {isActive ? (
-                                <Mic className="size-6 text-white" />
-                            ) : (
-                                <MicOff className="size-6 text-[#212a3b]" />
-                            )}
-                        </button>
-                    </div>
                 </div>
+                <div className="stage-vignette" aria-hidden="true" />
 
-                <div className="min-w-0 flex-1 flex flex-col gap-2">
-                    <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#212a3b] leading-tight">{book.title}</h1>
-                    <p className="text-[#3d485e] text-lg">by {book.author}</p>
-
-                    <div className="mt-1 flex flex-wrap gap-2">
-                        <div className="vapi-status-indicator">
-                            <span className={`vapi-status-dot ${statusDotClass}`} />
-                            <span className="vapi-status-text">{STATUS_LABELS[status]}</span>
+                <div className="stage-hud">
+                    <div className="stage-topbar">
+                        <div className="stage-book-chip">
+                            <Image
+                                src={book.coverURL || '/assets/book-cover.svg'}
+                                alt=""
+                                width={40}
+                                height={60}
+                                className="stage-book-cover"
+                            />
+                            <div className="min-w-0">
+                                <h1 className="stage-book-title">{book.title}</h1>
+                                <p className="stage-book-author">by {book.author}</p>
+                            </div>
                         </div>
 
-                        <div className="vapi-status-indicator">
-                            <span className="vapi-status-text">Voice: {book.persona || 'Default'}</span>
-                        </div>
-
-                        <div className="vapi-status-indicator">
-                            <span className="vapi-status-text">{formatDuration(duration)}/{formatDuration(maxDurationSeconds)}</span>
+                        <div className="stage-meta">
+                            <div className="stage-chip">
+                                <span className={`vapi-status-dot ${statusDotClass}`} />
+                                <span>{STATUS_LABELS[status]}</span>
+                            </div>
+                            <div className="stage-chip tabular-nums">
+                                {formatDuration(duration)} / {formatDuration(maxDurationSeconds)}
+                            </div>
                         </div>
                     </div>
+
+                    <div className="stage-captions" aria-live="polite">
+                        <p className={`stage-caption stage-caption-ai ${isAiTurn ? 'stage-caption-live' : ''}`}>
+                            <span className="stage-caption-text">{aiCaption}</span>
+                        </p>
+                        {userCaption && (
+                            <p className={`stage-caption stage-caption-user ${isUserTurn ? 'stage-caption-live' : ''}`}>
+                                <span className="stage-caption-text">{userCaption}</span>
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="stage-bottombar">
+                        <div className={`stage-nameplate stage-nameplate-ai ${isAiTurn ? 'stage-nameplate-live' : ''}`}>
+                            <Bot className="size-5 shrink-0" />
+                            <div className="min-w-0">
+                                <p className="stage-nameplate-name">{voiceName}</p>
+                                <p className="stage-nameplate-role">AI companion</p>
+                            </div>
+                        </div>
+
+                        <div className="stage-mic">
+                            <div className="relative">
+                                {isActive && <span className="stage-mic-ring" aria-hidden="true" />}
+                                <button
+                                    onClick={isActive ? stop : start}
+                                    disabled={status === 'connecting'}
+                                    type="button"
+                                    className={`stage-mic-btn ${isActive ? 'stage-mic-btn-active' : 'stage-mic-btn-inactive'}`}
+                                    aria-label={isActive ? "End conversation" : "Start conversation"}
+                                >
+                                    {isActive ? <PhoneOff className="size-7" /> : <Mic className="size-7" />}
+                                </button>
+                            </div>
+                            <p className="stage-mic-hint">
+                                {status === 'connecting' ? 'Connecting…' : isActive ? 'Tap to end' : 'Tap to talk'}
+                            </p>
+                        </div>
+
+                        <div className={`stage-nameplate stage-nameplate-user ${isUserTurn ? 'stage-nameplate-live' : ''}`}>
+                            <div className="min-w-0 text-right">
+                                <p className="stage-nameplate-name">You</p>
+                                <p className="stage-nameplate-role">Reader</p>
+                            </div>
+                            <User className="size-5 shrink-0" />
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </section>
 
             {limitError && (
                 <div className="warning-banner" role="alert">

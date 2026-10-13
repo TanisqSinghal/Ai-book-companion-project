@@ -34,7 +34,7 @@ const page = async ({ params }: BookPageProps) => {
                 <ArrowLeft className="size-5 text-[#212a3b]" />
             </Link>
 
-            <div className="mx-auto max-w-4xl flex flex-col gap-6">
+            <div className="mx-auto max-w-6xl flex flex-col gap-6">
                 {/* VAPI Controls area */}
                 <VapiControls book={book}/>
             </div>

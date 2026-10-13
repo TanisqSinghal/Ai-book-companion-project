@@ -6,10 +6,15 @@ import { toast } from "sonner";
 import {BookCardProps} from "@/types";
 import Image from "next/image";
 import { BookOpen } from "lucide-react";
+import { useRef } from "react";
+
+const MAX_TURN_DEG = 28;
+const MAX_PITCH_DEG = 8;
 
 const BookCard = ({ title, author, coverURL, fileURL, slug }: BookCardProps) => {
     const { userId } = useAuth();
     const router = useRouter();
+    const bookRef = useRef<HTMLDivElement>(null);
 
     const handleBookClick = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -22,11 +27,30 @@ const BookCard = ({ title, author, coverURL, fileURL, slug }: BookCardProps) => 
         router.push(`/books/${slug}`);
     };
 
+    // Turn the 3D book toward the pointer
+    const handleTilt = (e: React.PointerEvent<HTMLDivElement>) => {
+        const bounds = e.currentTarget.getBoundingClientRect();
+        const x = (e.clientX - bounds.left) / bounds.width - 0.5;
+        const y = (e.clientY - bounds.top) / bounds.height - 0.5;
+
+        bookRef.current?.style.setProperty('--book-ry', `${x * MAX_TURN_DEG * 2}deg`);
+        bookRef.current?.style.setProperty('--book-rx', `${-y * MAX_PITCH_DEG * 2}deg`);
+    };
+
+    const resetTilt = () => {
+        bookRef.current?.style.removeProperty('--book-ry');
+        bookRef.current?.style.removeProperty('--book-rx');
+    };
+
     return  (
         <article className="book-card" onClick={handleBookClick} style={{ cursor: 'pointer' }}>
             <figure className="book-card-figure">
-                <div className="book-card-cover-wrapper">
-                    <Image src={coverURL} alt={title} width={133} height={200} className="book-card-cover" />
+                <div className="book-card-cover-wrapper" onPointerMove={handleTilt} onPointerLeave={resetTilt}>
+                    <div ref={bookRef} className="book-3d">
+                        <span className="book-3d-spine" aria-hidden="true" />
+                        <span className="book-3d-pages" aria-hidden="true" />
+                        <Image src={coverURL} alt={title} width={133} height={200} className="book-card-cover" />
+                    </div>
                 </div>
                 
                 <figcaption className="book-card-meta">
