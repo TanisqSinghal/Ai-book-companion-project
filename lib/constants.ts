@@ -106,11 +106,11 @@ export const voiceOptions = {
     dave: { id: 'CYw3kZ02Hs0563khs1Fj', name: 'Dave', description: 'Young male, British-Essex, casual & conversational' },
     daniel: { id: 'onwK4e9ZLuTAKqWW03F9', name: 'Daniel', description: 'Middle-aged male, British, authoritative but warm' },
     chris: { id: 'iP95p4xoKVk53GoZ742B', name: 'Chris', description: 'Male, casual & easy-going' },
-    sagar: { id: 'Sagar', name: 'सागर', description: 'पुरुष, भारतीय लहजा, गर्मजोशी भरा अंदाज़' },
+    sagar: { id: 'pqHfZKP75CvOlQylNhV4', name: 'सागर', description: 'पुरुष, हिंदी में सहज, गर्मजोशी भरा अंदाज़' },
     // Female voices
     rachel: { id: '21m00Tcm4TlvDq8ikWAM', name: 'Rachel', description: 'Young female, American, calm & clear' },
     sarah: { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah', description: 'Young female, American, soft & approachable' },
-    naina: { id: 'Naina', name: 'नैना', description: 'महिला, भारतीय लहजा, साफ़ और दोस्ताना' },
+    naina: { id: 'EXAVITQu4vr4xnSDxMaL', name: 'नैना', description: 'महिला, हिंदी में सहज, साफ़ और दोस्ताना' },
 };
 
 // Voice categories for the selector UI
@@ -119,8 +119,8 @@ export const voiceCategories = {
     female: ['rachel', 'sarah', 'naina'],
 };
 
-// Indian-accent voices served by Vapi itself (all other voices are ElevenLabs)
-export const VAPI_NATIVE_VOICES = ['sagar', 'naina'];
+// Hindi voices (ElevenLabs Bill / Sarah) - Hinglish calls always use one of these
+export const HINDI_VOICES = ['sagar', 'naina'];
 
 // Default voice
 export const DEFAULT_VOICE = 'rachel';

@@ -5,7 +5,7 @@ import Vapi from '@vapi-ai/web';
 import { useAuth } from '@clerk/nextjs';
 
 import { ASSISTANT_ID, DEFAULT_VOICE, HINGLISH_ASSISTANT_ID, VOICE_SETTINGS } from '@/lib/constants';
-import { getHinglishVoice, getVoice, isVapiNativeVoice } from '@/lib/utils';
+import { getHinglishVoice, getVoice } from '@/lib/utils';
 import { IBook, Messages } from '@/types';
 import { startVoiceSession, endVoiceSession } from '@/lib/actions/session.actions';
 import { useSubscriptionPlan } from '@/hooks/useSubscriptionPlan';
@@ -62,7 +62,7 @@ const getConfigurationError = (language: VapiLanguage) => {
 
 const getFirstMessage = (language: VapiLanguage, title: string) =>
     language === 'hinglish'
-        ? `Hey, aapse milke achha laga! Shuru karne se pehle ek baat batao - kya aapne ${title} padhi hai, ya hum bilkul shuru se start karein?`
+        ? `नमस्ते! आपसे मिलकर अच्छा लगा। शुरू करने से पहले एक बात बताइए, क्या आपने ${title} पढ़ी है, या हम बिल्कुल शुरुआत से शुरू करें?`
         : `Hey, good to meet you. Quick question before we dive in - have you actually read ${title} yet, or are we starting fresh?`;
 
 export type CallStatus = 'idle' | 'connecting' | 'starting' | 'listening' | 'thinking' | 'speaking';
@@ -319,21 +319,16 @@ export function useVapi(book: IBook, language: VapiLanguage = 'english') {
                     author: book.author,
                     bookId: book._id,
                 },
-                // Indian-accent voices (सागर/नैना) are Vapi-native; Hinglish always uses one of them
-                voice: isVapiNativeVoice(activeVoice.id)
-                    ? {
-                        provider: 'vapi' as const,
-                        voiceId: activeVoice.id,
-                    }
-                    : {
-                        provider: '11labs' as const,
-                        voiceId: activeVoice.id,
-                        model: 'eleven_turbo_v2_5' as const,
-                        stability: VOICE_SETTINGS.stability,
-                        similarityBoost: VOICE_SETTINGS.similarityBoost,
-                        style: VOICE_SETTINGS.style,
-                        useSpeakerBoost: VOICE_SETTINGS.useSpeakerBoost,
-                    },
+                // English keeps the low-latency turbo model; Hinglish uses multilingual v2 for proper Hindi pronunciation
+                voice: {
+                    provider: '11labs' as const,
+                    voiceId: activeVoice.id,
+                    model: language === 'hinglish' ? 'eleven_multilingual_v2' as const : 'eleven_turbo_v2_5' as const,
+                    stability: VOICE_SETTINGS.stability,
+                    similarityBoost: VOICE_SETTINGS.similarityBoost,
+                    style: VOICE_SETTINGS.style,
+                    useSpeakerBoost: VOICE_SETTINGS.useSpeakerBoost,
+                },
             });
         } catch (err) {
             console.error('Failed to start call:', err);
