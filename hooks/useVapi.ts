@@ -65,6 +65,19 @@ const getFirstMessage = (language: VapiLanguage, title: string) =>
         ? `नमस्ते! आपसे मिलकर अच्छा लगा। शुरू करने से पहले एक बात बताइए, क्या आपने ${title} पढ़ी है, या हम बिल्कुल शुरुआत से शुरू करें?`
         : `Hey, good to meet you. Quick question before we dive in - have you actually read ${title} yet, or are we starting fresh?`;
 
+// Vapi reports API failures as objects (e.g. { message, error, statusCode }), not strings
+const getVapiErrorMessage = (error: unknown): string => {
+    if (!error) return 'Vapi could not start the call.';
+    if (typeof error === 'string') return error;
+    if (Array.isArray(error)) return error.map(getVapiErrorMessage).join(', ');
+    if (typeof error === 'object') {
+        const { message, error: detail } = error as { message?: unknown; error?: unknown };
+        if (message) return getVapiErrorMessage(message);
+        if (detail) return getVapiErrorMessage(detail);
+    }
+    return JSON.stringify(error);
+};
+
 export type CallStatus = 'idle' | 'connecting' | 'starting' | 'listening' | 'thinking' | 'speaking';
 
 export function useVapi(book: IBook, language: VapiLanguage = 'english') {
@@ -213,7 +226,7 @@ export function useVapi(book: IBook, language: VapiLanguage = 'english') {
                 }
             },
 
-            error: (error: Error) => {
+            error: (error: Error & { type?: string }) => {
                 console.error('Vapi error:', error);
                 // Don't reset isStoppingRef here - delayed events may still fire
                 setStatus('idle');
@@ -226,16 +239,22 @@ export function useVapi(book: IBook, language: VapiLanguage = 'english') {
                     timerRef.current = null;
                 }
 
-                // End session tracking on error
+                // End session tracking on error (a call that never started has no duration of its own)
                 if (sessionIdRef.current) {
-                    endVoiceSession(sessionIdRef.current, durationRef.current).catch((err) =>
+                    const callDuration = startTimeRef.current ? durationRef.current : 0;
+                    endVoiceSession(sessionIdRef.current, callDuration).catch((err) =>
                         console.error('Failed to end voice session on error:', err),
                     );
                     sessionIdRef.current = null;
                 }
 
+                startTimeRef.current = null;
+
+                // Start failures were already explained by 'call-start-failed' - keep that message
+                if (error.type === 'start-method-error') return;
+
                 // Show user-friendly error message
-                const errorMessage = error.message?.toLowerCase() || '';
+                const errorMessage = typeof error.message === 'string' ? error.message.toLowerCase() : '';
                 if (errorMessage.includes('timeout') || errorMessage.includes('silence')) {
                     setLimitError('Session ended due to inactivity. Click the mic to start again.');
                 } else if (errorMessage.includes('network') || errorMessage.includes('connection')) {
@@ -243,13 +262,11 @@ export function useVapi(book: IBook, language: VapiLanguage = 'english') {
                 } else {
                     setLimitError('Session ended unexpectedly. Click the mic to start again.');
                 }
-
-                startTimeRef.current = null;
             },
 
-            'call-start-failed': (event: { error?: string }) => {
-                const message = event.error || 'Vapi could not start the call.';
-                console.error('Vapi call start failed:', message);
+            'call-start-failed': (event: { error?: unknown }) => {
+                const message = getVapiErrorMessage(event.error);
+                console.error('Vapi call start failed:', message, event);
                 setStatus('idle');
                 setLimitError(message);
             },
@@ -340,7 +357,8 @@ export function useVapi(book: IBook, language: VapiLanguage = 'english') {
             }
 
             setStatus('idle');
-            setLimitError('Failed to start voice session. Please try again.');
+            // Keep the specific reason from 'call-start-failed' if Vapi already reported one
+            setLimitError((current) => current ?? 'Failed to start voice session. Please try again.');
         }
     }, [book._id, book.title, book.author, limits.maxSessionMinutes, voice, userId, language]);
 
