@@ -95,6 +95,9 @@ export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'im
 // Pre-configured VAPI assistant ID (hardcoded for this app)
 export const ASSISTANT_ID = process.env.NEXT_PUBLIC_ASSISTANT_ID!;
 
+// Optional Hinglish assistant (separate Vapi account) - toggle is hidden when not configured
+export const HINGLISH_ASSISTANT_ID = process.env.NEXT_PUBLIC_HINGLISH_ASSISTANT_ID;
+
 // 11Labs Voice IDs - Optimized for conversational AI
 // Voices selected for natural, engaging book conversations
 export const voiceOptions = {

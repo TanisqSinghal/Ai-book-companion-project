@@ -1,11 +1,11 @@
 'use client';
 
 import { Mic, MicOff } from "lucide-react";
-import useVapi from "@/hooks/useVapi";
+import useVapi, { IS_HINGLISH_AVAILABLE, VapiLanguage } from "@/hooks/useVapi";
 import { IBook } from "@/types";
 import Image from "next/image";
 import Transcript from "@/components/Transcript";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const formatDuration = (totalSeconds: number) => {
@@ -24,8 +24,14 @@ const STATUS_LABELS = {
     speaking: 'Speaking',
 } as const;
 
+const LANGUAGE_OPTIONS: { value: VapiLanguage; label: string }[] = [
+    { value: 'english', label: 'English' },
+    { value: 'hinglish', label: 'Hinglish' },
+];
+
 const VapiControls = ({ book }: { book: IBook }) => {
     const router = useRouter();
+    const [language, setLanguage] = useState<VapiLanguage>('english');
 
     const { status,
         isActive,
@@ -38,7 +44,7 @@ const VapiControls = ({ book }: { book: IBook }) => {
         stop,
         didHitSessionLimit,
         limitError,
-    } = useVapi(book);
+    } = useVapi(book, language);
 
     useEffect(() => {
         if (didHitSessionLimit) {
@@ -97,6 +103,24 @@ const VapiControls = ({ book }: { book: IBook }) => {
                         <div className="vapi-status-indicator">
                             <span className="vapi-status-text">{formatDuration(duration)}/{formatDuration(maxDurationSeconds)}</span>
                         </div>
+
+                        {IS_HINGLISH_AVAILABLE && (
+                            <div className="vapi-status-indicator" role="radiogroup" aria-label="Conversation language">
+                                {LANGUAGE_OPTIONS.map((option) => (
+                                    <button
+                                        key={option.value}
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={language === option.value}
+                                        onClick={() => setLanguage(option.value)}
+                                        disabled={status !== 'idle'}
+                                        className={`vapi-status-text px-2 rounded-[4px] disabled:cursor-not-allowed disabled:opacity-60 ${language === option.value ? 'bg-[#212a3b] !text-white' : ''}`}
+                                    >
+                                        {option.label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
