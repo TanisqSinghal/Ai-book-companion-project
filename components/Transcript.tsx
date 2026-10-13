@@ -11,14 +11,16 @@ interface TranscriptProps {
 }
 
 const Transcript = ({ messages, currentMessage, currentUserMessage }: TranscriptProps) => {
-    const bottomRef = useRef<HTMLDivElement | null>(null);
+    const messagesRef = useRef<HTMLDivElement | null>(null);
 
     const hasConversation = useMemo(() => {
         return messages.length > 0 || currentMessage.trim().length > 0 || currentUserMessage.trim().length > 0;
     }, [messages, currentMessage, currentUserMessage]);
 
+    // Scroll only inside the transcript box - scrollIntoView would also scroll the page away from the stage
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+        const container = messagesRef.current;
+        if (container) container.scrollTop = container.scrollHeight;
     }, [messages, currentMessage, currentUserMessage]);
 
     if (!hasConversation) {
@@ -35,7 +37,7 @@ const Transcript = ({ messages, currentMessage, currentUserMessage }: Transcript
 
     return (
         <div className="transcript-container">
-            <div className="transcript-messages">
+            <div ref={messagesRef} className="transcript-messages">
                 {messages.map((message, index) => {
                     const isUser = message.role === "user";
 
@@ -72,8 +74,6 @@ const Transcript = ({ messages, currentMessage, currentUserMessage }: Transcript
                         </div>
                     </div>
                 )}
-
-                <div ref={bottomRef} />
             </div>
         </div>
     );

@@ -118,7 +118,7 @@ const VapiControls = ({ book }: { book: IBook }) => {
 
                         <div className="stage-meta">
                             {IS_HINGLISH_AVAILABLE && (
-                                <div className="stage-chip !gap-1 !p-1" role="radiogroup" aria-label="Conversation language">
+                                <div className="stage-chip !gap-1 !p-1 pointer-events-auto" role="radiogroup" aria-label="Conversation language">
                                     {LANGUAGE_OPTIONS.map((option) => (
                                         <button
                                             key={option.value}
