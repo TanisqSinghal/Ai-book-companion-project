@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Vapi from '@vapi-ai/web';
 import { useAuth } from '@clerk/nextjs';
 
-import { ASSISTANT_ID, DEFAULT_VOICE, VOICE_SETTINGS } from '@/lib/constants';
-import { getVoice } from '@/lib/utils';
+import { ASSISTANT_ID, DEFAULT_VOICE, HINGLISH_ASSISTANT_ID, VOICE_SETTINGS } from '@/lib/constants';
+import { getHinglishVoice, getVoice, isVapiNativeVoice } from '@/lib/utils';
 import { IBook, Messages } from '@/types';
 import { startVoiceSession, endVoiceSession } from '@/lib/actions/session.actions';
 import { useSubscriptionPlan } from '@/hooks/useSubscriptionPlan';
@@ -20,30 +20,54 @@ export function useLatestRef<T>(value: T) {
     return ref;
 }
 
-const VAPI_API_KEY = process.env.NEXT_PUBLIC_VAPI_API_KEY;
 const TIMER_INTERVAL_MS = 1000;
 const SECONDS_PER_MINUTE = 60;
 
-let vapi: InstanceType<typeof Vapi>;
-function getVapi() {
-    if (!vapi) {
-        if (!VAPI_API_KEY) {
-            throw new Error('NEXT_PUBLIC_VAPI_API_KEY environment variable is not set');
+export type VapiLanguage = 'english' | 'hinglish';
+
+// Each language uses its own Vapi account (public key + assistant must belong to the same org)
+const VAPI_CONFIGS: Record<VapiLanguage, { apiKey?: string; assistantId?: string; keyEnv: string; assistantEnv: string }> = {
+    english: {
+        apiKey: process.env.NEXT_PUBLIC_VAPI_API_KEY,
+        assistantId: ASSISTANT_ID,
+        keyEnv: 'NEXT_PUBLIC_VAPI_API_KEY',
+        assistantEnv: 'NEXT_PUBLIC_ASSISTANT_ID',
+    },
+    hinglish: {
+        apiKey: process.env.NEXT_PUBLIC_VAPI_HINGLISH_API_KEY,
+        assistantId: HINGLISH_ASSISTANT_ID,
+        keyEnv: 'NEXT_PUBLIC_VAPI_HINGLISH_API_KEY',
+        assistantEnv: 'NEXT_PUBLIC_HINGLISH_ASSISTANT_ID',
+    },
+};
+
+const vapiClients: Partial<Record<VapiLanguage, InstanceType<typeof Vapi>>> = {};
+function getVapi(language: VapiLanguage) {
+    if (!vapiClients[language]) {
+        const { apiKey, keyEnv } = VAPI_CONFIGS[language];
+        if (!apiKey) {
+            throw new Error(`${keyEnv} environment variable is not set`);
         }
-        vapi = new Vapi(VAPI_API_KEY);
+        vapiClients[language] = new Vapi(apiKey);
     }
-    return vapi;
+    return vapiClients[language];
 }
 
-const getConfigurationError = () => {
-    if (!VAPI_API_KEY) return 'Vapi is not configured. Add NEXT_PUBLIC_VAPI_API_KEY and try again.';
-    if (!ASSISTANT_ID) return 'Vapi assistant is not configured. Add NEXT_PUBLIC_ASSISTANT_ID and try again.';
+const getConfigurationError = (language: VapiLanguage) => {
+    const { apiKey, assistantId, keyEnv, assistantEnv } = VAPI_CONFIGS[language];
+    if (!apiKey) return `Vapi is not configured. Add ${keyEnv} and try again.`;
+    if (!assistantId) return `Vapi assistant is not configured. Add ${assistantEnv} and try again.`;
     return null;
 };
 
+const getFirstMessage = (language: VapiLanguage, title: string) =>
+    language === 'hinglish'
+        ? `Hey, aapse milke achha laga! Shuru karne se pehle ek baat batao - kya aapne ${title} padhi hai, ya hum bilkul shuru se start karein?`
+        : `Hey, good to meet you. Quick question before we dive in - have you actually read ${title} yet, or are we starting fresh?`;
+
 export type CallStatus = 'idle' | 'connecting' | 'starting' | 'listening' | 'thinking' | 'speaking';
 
-export function useVapi(book: IBook) {
+export function useVapi(book: IBook, language: VapiLanguage = 'english') {
     const { userId } = useAuth();
     const { limits } = useSubscriptionPlan();
 
@@ -101,7 +125,7 @@ export function useVapi(book: IBook) {
                                     maxDurationRef.current / SECONDS_PER_MINUTE,
                                 )} minutes) reached.`,
                             );
-                            getVapi().stop();
+                            getVapi(language).stop();
                         }
                     }
                 }, TIMER_INTERVAL_MS);
@@ -231,10 +255,10 @@ export function useVapi(book: IBook) {
             },
         };
 
-        const configurationError = getConfigurationError();
+        const configurationError = getConfigurationError(language);
         if (configurationError) return;
 
-        const client = getVapi();
+        const client = getVapi(language);
         const cleanupDurationRef = durationRef;
         Object.entries(handlers).forEach(([event, handler]) => {
             client.on(event as keyof typeof handlers, handler as () => void);
@@ -255,7 +279,7 @@ export function useVapi(book: IBook) {
             });
             if (timerRef.current) clearInterval(timerRef.current);
         };
-    }, [durationRef, maxDurationRef]);
+    }, [durationRef, maxDurationRef, language]);
 
     const start = useCallback(async () => {
         if (!userId) {
@@ -268,7 +292,7 @@ export function useVapi(book: IBook) {
         setStatus('connecting');
 
         try {
-            const configurationError = getConfigurationError();
+            const configurationError = getConfigurationError(language);
             if (configurationError) throw new Error(configurationError);
 
             // Check session limits and create session record
@@ -285,24 +309,31 @@ export function useVapi(book: IBook) {
                 (result.maxDurationMinutes ?? limits.maxSessionMinutes) * SECONDS_PER_MINUTE,
             );
 
-            const firstMessage = `Hey, good to meet you. Quick question before we dive in - have you actually read ${book.title} yet, or are we starting fresh?`;
+            const firstMessage = getFirstMessage(language, book.title);
+            const activeVoice = language === 'hinglish' ? getHinglishVoice(voice) : getVoice(voice);
 
-            await getVapi().start(ASSISTANT_ID, {
+            await getVapi(language).start(VAPI_CONFIGS[language].assistantId, {
                 firstMessage,
                 variableValues: {
                     title: book.title,
                     author: book.author,
                     bookId: book._id,
                 },
-                voice: {
-                    provider: '11labs' as const,
-                    voiceId: getVoice(voice).id,
-                    model: 'eleven_turbo_v2_5' as const,
-                    stability: VOICE_SETTINGS.stability,
-                    similarityBoost: VOICE_SETTINGS.similarityBoost,
-                    style: VOICE_SETTINGS.style,
-                    useSpeakerBoost: VOICE_SETTINGS.useSpeakerBoost,
-                },
+                // Indian-accent voices (सागर/नैना) are Vapi-native; Hinglish always uses one of them
+                voice: isVapiNativeVoice(activeVoice.id)
+                    ? {
+                        provider: 'vapi' as const,
+                        voiceId: activeVoice.id,
+                    }
+                    : {
+                        provider: '11labs' as const,
+                        voiceId: activeVoice.id,
+                        model: 'eleven_turbo_v2_5' as const,
+                        stability: VOICE_SETTINGS.stability,
+                        similarityBoost: VOICE_SETTINGS.similarityBoost,
+                        style: VOICE_SETTINGS.style,
+                        useSpeakerBoost: VOICE_SETTINGS.useSpeakerBoost,
+                    },
             });
         } catch (err) {
             console.error('Failed to start call:', err);
@@ -316,12 +347,12 @@ export function useVapi(book: IBook) {
             setStatus('idle');
             setLimitError('Failed to start voice session. Please try again.');
         }
-    }, [book._id, book.title, book.author, limits.maxSessionMinutes, voice, userId]);
+    }, [book._id, book.title, book.author, limits.maxSessionMinutes, voice, userId, language]);
 
     const stop = useCallback(() => {
         isStoppingRef.current = true;
-        getVapi().stop();
-    }, []);
+        getVapi(language).stop();
+    }, [language]);
 
     const clearError = useCallback(() => {
         setLimitError(null);

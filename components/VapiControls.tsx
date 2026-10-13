@@ -2,14 +2,15 @@
 
 import { Bot, Mic, PhoneOff, User } from "lucide-react";
 import dynamic from "next/dynamic";
-import useVapi from "@/hooks/useVapi";
+import useVapi, { VapiLanguage } from "@/hooks/useVapi";
 import useMicLevel from "@/hooks/useMicLevel";
-import { getVoice } from "@/lib/utils";
+import { IS_HINGLISH_AVAILABLE } from "@/lib/constants";
+import { getHinglishVoice, getVoice } from "@/lib/utils";
 import { detectMood } from "@/lib/mood";
 import { IBook } from "@/types";
 import Image from "next/image";
 import Transcript from "@/components/Transcript";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 // WebGL only exists in the browser, so the 3D stage is never server-rendered
@@ -34,8 +35,14 @@ const STATUS_LABELS = {
     speaking: 'Speaking',
 } as const;
 
+const LANGUAGE_OPTIONS: { value: VapiLanguage; label: string }[] = [
+    { value: 'english', label: 'English' },
+    { value: 'hinglish', label: 'Hinglish' },
+];
+
 const VapiControls = ({ book }: { book: IBook }) => {
     const router = useRouter();
+    const [language, setLanguage] = useState<VapiLanguage>('english');
 
     const { status,
         isActive,
@@ -49,7 +56,7 @@ const VapiControls = ({ book }: { book: IBook }) => {
         stop,
         didHitSessionLimit,
         limitError,
-    } = useVapi(book);
+    } = useVapi(book, language);
 
     const micLevelRef = useMicLevel(isActive);
 
@@ -60,7 +67,7 @@ const VapiControls = ({ book }: { book: IBook }) => {
     }, [didHitSessionLimit, router]);
 
     const statusDotClass = `vapi-status-dot-${status === 'idle' ? 'ready' : status}`;
-    const voiceName = getVoice(book.persona).name;
+    const voiceName = (language === 'hinglish' ? getHinglishVoice(book.persona) : getVoice(book.persona)).name;
 
     const lastAssistantMessage = messages.findLast((message) => message.role === 'assistant')?.content;
     const lastUserMessage = messages.findLast((message) => message.role === 'user')?.content;
@@ -110,6 +117,23 @@ const VapiControls = ({ book }: { book: IBook }) => {
                         </div>
 
                         <div className="stage-meta">
+                            {IS_HINGLISH_AVAILABLE && (
+                                <div className="stage-chip !gap-1 !p-1" role="radiogroup" aria-label="Conversation language">
+                                    {LANGUAGE_OPTIONS.map((option) => (
+                                        <button
+                                            key={option.value}
+                                            type="button"
+                                            role="radio"
+                                            aria-checked={language === option.value}
+                                            onClick={() => setLanguage(option.value)}
+                                            disabled={status !== 'idle'}
+                                            className={`rounded-full px-2.5 py-0.5 transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${language === option.value ? 'bg-white/20 text-white' : 'text-white/60 hover:text-white'}`}
+                                        >
+                                            {option.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                             <div className="stage-chip">
                                 <span className={`vapi-status-dot ${statusDotClass}`} />
                                 <span>{STATUS_LABELS[status]}</span>

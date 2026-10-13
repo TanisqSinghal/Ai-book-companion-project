@@ -1,7 +1,7 @@
 import { TextSegment } from '@/types';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { DEFAULT_VOICE, voiceOptions } from './constants';
+import { DEFAULT_VOICE, VAPI_NATIVE_VOICES, voiceCategories, voiceOptions } from './constants';
 
 
 export function cn(...inputs: ClassValue[]) {
@@ -81,6 +81,23 @@ export const getVoice = (persona?: string) => {
 
   // Default fallback
   return voiceOptions[DEFAULT_VOICE];
+};
+
+// Resolve a persona (voice key or voice ID) to its voice key
+const getVoiceKey = (persona?: string) => {
+  const entry = Object.entries(voiceOptions).find(([key, v]) => key === persona || v.id === persona);
+  return entry ? entry[0] : DEFAULT_VOICE;
+};
+
+// Indian-accent voices are served by Vapi; every other voice is ElevenLabs
+export const isVapiNativeVoice = (persona?: string) => VAPI_NATIVE_VOICES.includes(getVoiceKey(persona));
+
+// Hinglish voice for a book: its own voice if Indian-accent, otherwise सागर/नैना matching its gender
+export const getHinglishVoice = (persona?: string) => {
+  const key = getVoiceKey(persona);
+  if (VAPI_NATIVE_VOICES.includes(key)) return voiceOptions[key as keyof typeof voiceOptions];
+
+  return voiceCategories.male.includes(key) ? voiceOptions.sagar : voiceOptions.naina;
 };
 
 // Format duration in seconds to MM:SS format
