@@ -1,5 +1,5 @@
 import HeroSection from "@/components/HeroSection";
-import BookCard from "@/components/BookCard";
+import Bookshelf from "@/components/shelf/Bookshelf";
 import BooksSearchBar from "@/components/BooksSearchBar";
 import { getAllBooks } from "@/lib/actions/book.actions";
 
@@ -28,18 +28,16 @@ const page = async ({ searchParams }: HomePageProps) => {
         <BooksSearchBar initialQuery={searchQuery} />
       </section>
 
-      <div className="library-books-grid">
-        {books.map((book) => (
-          <BookCard
-            key={book._id}
-            title={book.title}
-            author={book.author}
-            coverURL={book.coverURL}
-            fileURL={book.fileURL}
-            slug={book.slug}
-          />
-        ))}
-      </div>
+      <Bookshelf
+        books={books.map((book) => ({
+          id: String(book._id),
+          title: book.title,
+          author: book.author,
+          coverURL: book.coverURL,
+          fileURL: book.fileURL,
+          slug: book.slug,
+        }))}
+      />
     </main>
   );
 };

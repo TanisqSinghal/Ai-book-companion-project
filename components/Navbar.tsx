@@ -16,10 +16,10 @@ const Navbar = () => {
   const { user } = useUser();
 
   return (
-    <header className="w-full fixed z-50 bg-(--bg-primary)">
+    <header className="w-full fixed z-50 bg-(--bg-primary)/85 backdrop-blur-md border-b border-(--border-subtle)">
       <div className="wrapper navbar-height py-4 flex justify-between items-center">
         <Link href="/" className="flex gap-0.5 items-center">
-          <Image src="/assets/logo.png" alt="libroAi" width={42} height={26} />
+          <Image src="/assets/logo.png" alt="libroAi" width={42} height={26} className="invert" />
           <span className="logo-text">LibroAi</span>
         </Link>
 
@@ -34,7 +34,7 @@ const Navbar = () => {
                 key={label}
                 className={cn(
                   "nav-link-base",
-                  isActive ? "nav-link-active" : "text-black hover:opacity-70",
+                  isActive ? "nav-link-active" : "text-(--text-primary) hover:opacity-70",
                 )}
               >
                 {label}
@@ -45,10 +45,10 @@ const Navbar = () => {
           <div className="flex gap-7.5 items-center">
             <Show when="signed-out">
               <SignInButton mode="modal">
-                <button className="text-black hover:opacity-70">Sign In</button>
+                <button className="text-(--text-primary) hover:opacity-70">Sign In</button>
               </SignInButton>
               <SignUpButton mode="modal">
-                <button className="text-black hover:opacity-70">Sign Up</button>
+                <button className="text-(--text-primary) hover:opacity-70">Sign Up</button>
               </SignUpButton>
             </Show>
 

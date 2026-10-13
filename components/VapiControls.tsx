@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import useVapi from "@/hooks/useVapi";
 import useMicLevel from "@/hooks/useMicLevel";
 import { getVoice } from "@/lib/utils";
+import { detectMood } from "@/lib/mood";
 import { IBook } from "@/types";
 import Image from "next/image";
 import Transcript from "@/components/Transcript";
@@ -69,6 +70,10 @@ const VapiControls = ({ book }: { book: IBook }) => {
         (status === 'idle' ? `Tap the mic and let's talk about ${book.title}.` : 'One moment…');
     const userCaption = currentUserMessage || lastUserMessage;
 
+    // The robot shows the tone of its own words; the reader reacts to them, or shows their own while talking
+    const aiMood = status === 'speaking' ? detectMood(currentMessage || lastAssistantMessage || '') : 'neutral';
+    const userMood = status === 'listening' ? detectMood(currentUserMessage) : aiMood;
+
     const isAiTurn = status === 'speaking' || status === 'thinking';
     const isUserTurn = status === 'listening';
 
@@ -82,6 +87,8 @@ const VapiControls = ({ book }: { book: IBook }) => {
                         userLevel={micLevelRef}
                         userSpeaking={currentUserMessage.trim().length > 0}
                         coverURL={book.coverURL}
+                        aiMood={aiMood}
+                        userMood={userMood}
                     />
                 </div>
                 <div className="stage-vignette" aria-hidden="true" />

@@ -19,6 +19,22 @@ const monaSans = Mona_Sans({
     display: 'swap'
 })
 
+// Matches Clerk's sign-in, account and pricing widgets to the dark theme in globals.css
+const clerkAppearance = {
+    variables: {
+        colorPrimary: '#ffb454',
+        colorPrimaryForeground: '#1a0f02',
+        colorBackground: '#0f1730',
+        colorForeground: '#f2f5fb',
+        colorMutedForeground: '#a9b4cc',
+        colorMuted: '#18233f',
+        colorInput: '#111a36',
+        colorInputForeground: '#f2f5fb',
+        colorNeutral: '#ffffff',
+        colorBorder: 'rgba(255, 255, 255, 0.16)',
+    },
+};
+
 export const metadata: Metadata = {
   title: "LibroAi",
   description: "Transform your books into interactive AI conversations. Upload PDFs, and chat with your books using voice.",
@@ -30,7 +46,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider appearance={clerkAppearance}>
         <html lang="en">
           <body
             className={`${ibmPlexSerif.variable} ${monaSans.variable} relative font-sans antialiased`}

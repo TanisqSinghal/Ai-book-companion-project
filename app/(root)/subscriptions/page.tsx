@@ -47,7 +47,7 @@ export default function SubscriptionsPage() {
           {planFeatureCards.map((plan) => (
             <section
               key={plan.name}
-              className="rounded-[14px] border border-[var(--border-subtle)] bg-white p-5 shadow-soft-sm"
+              className="rounded-[14px] border border-[var(--border-subtle)] bg-(--bg-secondary) p-5 shadow-soft-sm"
             >
               <h2 className="text-xl font-semibold font-serif text-[var(--text-primary)]">
                 {plan.name} includes

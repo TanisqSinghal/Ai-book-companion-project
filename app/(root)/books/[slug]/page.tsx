@@ -31,7 +31,7 @@ const page = async ({ params }: BookPageProps) => {
     return (
         <main className="book-page-container">
             <Link href="/" className="back-btn-floating" aria-label="Go back">
-                <ArrowLeft className="size-5 text-[#212a3b]" />
+                <ArrowLeft className="size-5 text-(--text-primary)" />
             </Link>
 
             <div className="mx-auto max-w-6xl flex flex-col gap-6">

@@ -25,7 +25,7 @@ const Transcript = ({ messages, currentMessage, currentUserMessage }: Transcript
         return (
             <div className="transcript-container">
                 <div className="transcript-empty">
-                    <Mic className="size-12 text-[#212a3b]" />
+                    <Mic className="size-12 text-(--text-secondary)" />
                     <p className="transcript-empty-text mt-3">No conversation yet</p>
                     <p className="transcript-empty-hint">Click the mic button above to start talking</p>
                 </div>

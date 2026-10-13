@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
 
 import type { CallStatus } from '@/hooks/useVapi';
+import { detectMood } from '@/lib/mood';
 
 // WebGL only exists in the browser, so the 3D stage is never server-rendered
 const ConversationStage = dynamic(() => import('@/components/stage/ConversationStage'), {
@@ -35,6 +36,7 @@ const HeroStage = () => {
     const userLevel = useRef(0);
 
     const beat = DEMO_BEATS[beatIndex];
+    const mood = beat.status === 'thinking' ? 'neutral' : detectMood(beat.caption);
 
     useEffect(() => {
         const timeout = window.setTimeout(() => {
@@ -66,6 +68,8 @@ const HeroStage = () => {
                     userLevel={userLevel}
                     userSpeaking={beat.status === 'listening'}
                     coverURL="/assets/book-cover.svg"
+                    aiMood={beat.speaker === 'ai' ? mood : 'neutral'}
+                    userMood={mood}
                 />
             </div>
             <div className="hero3d-scene-fade" />

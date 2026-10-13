@@ -49,77 +49,80 @@
 
 :root {
   --radius: 0.625rem;
+  color-scheme: dark;
 
-  /* Warm Literary Backgrounds */
-  --bg-primary: #f8f4e9;
-  --bg-secondary: #f3e4c7;
-  --bg-tertiary: #fff6e5;
-  --bg-card: #ffffff;
+  /* Deep-space backgrounds, matching the 3D stage */
+  --bg-primary: #070b18;
+  --bg-secondary: #0f1730;
+  --bg-tertiary: #18233f;
+  --bg-card: #0f1730;
 
-  /* Warm Text Colors */
-  --text-primary: #212a3b;
-  --text-secondary: #3d485e;
-  --text-muted: #222c37;
+  /* Text */
+  --text-primary: #f2f5fb;
+  --text-secondary: #a9b4cc;
+  --text-muted: #7f8aa5;
 
-  /* Warm Accent */
-  --accent-warm: #212a3b;
-  --accent-warm-hover: #3d485e;
-  --accent-light: #fff6e5;
+  /* Accents: amber for the reader, cyan for the AI */
+  --accent-warm: #ffb454;
+  --accent-warm-hover: #ffcb7d;
+  --accent-light: rgba(255, 180, 84, 0.12);
+  --accent-cool: #5ee7ff;
 
   /* Semantic Colors */
-  --success: #7c9a82;
-  --warning: #d4a853;
+  --success: #6fd6a0;
+  --warning: #ffb454;
 
   /* Borders */
-  --border-subtle: rgba(33, 42, 59, 0.12);
-  --border-medium: rgba(33, 42, 59, 0.2);
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-medium: rgba(255, 255, 255, 0.2);
 
-  /* Soft Shadows */
-  --shadow-soft-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-soft-md: 0 2px 4px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.08);
-  --shadow-soft-lg: 0 4px 12px rgba(0, 0, 0, 0.08), 0 16px 32px rgba(0, 0, 0, 0.12);
-  --shadow-book: 0px 10px 30px 0px rgba(0, 0, 0, 0.1);
+  /* Shadows */
+  --shadow-soft-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.35);
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-soft-md: 0 2px 4px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.45);
+  --shadow-soft-lg: 0 4px 12px rgba(0, 0, 0, 0.4), 0 16px 32px rgba(0, 0, 0, 0.5);
+  --shadow-book: 0px 10px 30px 0px rgba(0, 0, 0, 0.45);
 
   /* Base theme colors */
-  --background: #f8f4e9;
-  --foreground: #212a3b;
-  --card: #ffffff;
-  --card-foreground: #212a3b;
-  --popover: #ffffff;
-  --popover-foreground: #212a3b;
-  --primary: #212a3b;
-  --primary-foreground: #ffffff;
-  --secondary: #f3e4c7;
-  --secondary-foreground: #212a3b;
-  --muted: #f3e4c7;
-  --muted-foreground: #3d485e;
-  --accent: #fff6e5;
-  --accent-foreground: #212a3b;
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: rgba(33, 42, 59, 0.12);
-  --input: rgba(33, 42, 59, 0.12);
-  --ring: #212a3b;
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: #ffffff;
-  --sidebar-foreground: #212a3b;
-  --sidebar-primary: #212a3b;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f3e4c7;
-  --sidebar-accent-foreground: #212a3b;
-  --sidebar-border: rgba(33, 42, 59, 0.12);
-  --sidebar-ring: #212a3b;
+  --background: #070b18;
+  --foreground: #f2f5fb;
+  --card: #0f1730;
+  --card-foreground: #f2f5fb;
+  --popover: #111a36;
+  --popover-foreground: #f2f5fb;
+  --primary: #ffb454;
+  --primary-foreground: #1a0f02;
+  --secondary: #18233f;
+  --secondary-foreground: #f2f5fb;
+  --muted: #111a36;
+  --muted-foreground: #a9b4cc;
+  --accent: #18233f;
+  --accent-foreground: #f2f5fb;
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.16);
+  --ring: #5ee7ff;
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: #0f1730;
+  --sidebar-foreground: #f2f5fb;
+  --sidebar-primary: #ffb454;
+  --sidebar-primary-foreground: #1a0f02;
+  --sidebar-accent: #18233f;
+  --sidebar-accent-foreground: #f2f5fb;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #5ee7ff;
 
   /* Brand color */
-  --blue: #212a3b;
+  --blue: #5ee7ff;
 
-  /* Brand accent (warm brown) - for active states and CTAs */
-  --color-brand: #663820;
-  --color-brand-hover: #7a4528;
+  /* Brand accent - for active states and CTAs */
+  --color-brand: #ffb454;
+  --color-brand-hover: #ffcb7d;
+  --on-brand: #1a0f02;
 
   /* Layout dimensions */
   --navbar-height: 74px;
@@ -212,7 +215,7 @@
     @apply relative z-20 flex flex-col justify-center items-center p-7;
   }
   .form-btn {
-    @apply !w-full h-14 rounded-[10px] bg-[#663820] cursor-pointer hover:bg-[#7a4528] text-xl text-white font-bold transition-colors;
+    @apply !w-full h-14 rounded-[10px] bg-[var(--color-brand)] cursor-pointer hover:bg-[var(--color-brand-hover)] text-xl text-[var(--on-brand)] font-bold transition-colors;
     font-family: 'IBM Plex Serif', serif;
   }
   .loading-wrapper {
@@ -273,11 +276,11 @@
 
   /* Button utilities */
   .btn-primary {
-    @apply inline-flex items-center justify-center px-6 py-3 bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white font-bold rounded-[10px] transition-colors;
+    @apply inline-flex items-center justify-center px-6 py-3 bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-[var(--on-brand)] font-bold rounded-[10px] transition-colors;
     font-family: 'IBM Plex Serif', serif;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center px-6 py-3 bg-white hover:bg-gray-50 text-[var(--text-secondary)] font-medium rounded-[10px] transition-colors;
+    @apply inline-flex items-center justify-center px-6 py-3 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] font-medium rounded-[10px] transition-colors;
   }
 
   /* Layout utilities */
@@ -293,13 +296,13 @@
     @apply border-[var(--color-brand)];
   }
   .page-title-xl {
-    @apply text-4xl md:text-5xl font-semibold text-black tracking-[-0.02em] leading-[54px] font-serif;
+    @apply text-4xl md:text-5xl font-semibold text-[var(--text-primary)] tracking-[-0.02em] leading-[54px] font-serif;
   }
   .section-title {
-    @apply text-2xl md:text-[30px] font-semibold text-black leading-[30px] font-serif;
+    @apply text-2xl md:text-[30px] font-semibold text-[var(--text-primary)] leading-[30px] font-serif;
   }
   .book-title-lg {
-    @apply text-[30px] font-semibold text-black leading-9 mb-2 font-serif;
+    @apply text-[30px] font-semibold text-[var(--text-primary)] leading-9 mb-2 font-serif;
   }
   .subtitle {
     @apply text-xl text-[var(--text-secondary)] leading-7;
@@ -312,7 +315,7 @@
      NAVBAR COMPONENT
      =========================================== */
   .logo-text {
-    @apply font-semibold text-xl hidden sm:block text-black;
+    @apply font-semibold text-xl hidden sm:block text-[var(--text-primary)];
   }
   .nav-link-base {
     @apply text-base font-medium leading-6 transition-all;
@@ -321,32 +324,32 @@
     @apply text-[var(--color-brand)] border-b-2 border-[var(--color-brand)] pb-0.5;
   }
   .nav-btn {
-    @apply text-base font-medium text-black hover:opacity-70 transition-opacity cursor-pointer;
+    @apply text-base font-medium text-[var(--text-primary)] hover:opacity-70 transition-opacity cursor-pointer;
   }
   .nav-user-link {
     @apply flex items-center gap-1 hover:opacity-70 transition-opacity;
   }
   .nav-user-name {
-    @apply hidden sm:inline text-base font-medium text-black;
+    @apply hidden sm:inline text-base font-medium text-[var(--text-primary)];
   }
 
   /* ===========================================
      BANNER/ALERT COMPONENTS
      =========================================== */
   .error-banner {
-    @apply w-full mb-4 p-4 bg-red-50 border border-red-200 rounded-xl;
+    @apply w-full mb-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl;
   }
   .error-banner-content {
     @apply flex items-start justify-between gap-3;
   }
   .error-banner-icon {
-    @apply w-5 h-5 text-red-500 shrink-0 mt-0.5;
+    @apply w-5 h-5 text-red-400 shrink-0 mt-0.5;
   }
   .error-banner-link {
-    @apply inline-block mt-2 text-sm font-medium text-red-600 hover:text-red-800 underline;
+    @apply inline-block mt-2 text-sm font-medium text-red-300 hover:text-red-200 underline;
   }
   .error-banner-dismiss {
-    @apply text-red-400 hover:text-red-600 transition-colors;
+    @apply text-red-300 hover:text-red-200 transition-colors;
   }
   .warning-banner {
     @apply w-full mb-4 p-3 bg-[var(--accent-light)] border border-[var(--accent-warm)] rounded-xl;
@@ -383,52 +386,14 @@
   /* ===========================================
      VAPI CONTROLS COMPONENT
      =========================================== */
-  .vapi-header-card {
-    @apply flex items-center gap-6 bg-[#f3e4c7] rounded-[14px] p-6 relative overflow-hidden;
-  }
   .vapi-compact-header {
     @apply flex items-center gap-2 bg-[#f3e4c7] rounded-[14px] p-3 mb-3;
   }
   .vapi-transcript-wrapper {
     @apply min-h-[400px] max-h-[60vh] flex flex-col;
   }
-  .vapi-cover-wrapper {
-    @apply relative shrink-0;
-  }
   .vapi-cover-glow {
     @apply hidden;
-  }
-  .vapi-cover-image {
-    @apply relative w-[130px] h-[195px] sm:w-[162px] sm:h-[240px] rounded-lg object-cover;
-    box-shadow: 0px 10px 30px 0px rgba(0, 0, 0, 0.1);
-  }
-  .vapi-mic-wrapper {
-    @apply absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2;
-  }
-  .vapi-pulse-ring {
-    @apply absolute inset-0 w-[50px] h-[50px] sm:w-[60px] sm:h-[60px] bg-white rounded-full opacity-50 animate-ping;
-  }
-  .vapi-mic-btn {
-    @apply relative w-[50px] h-[50px] sm:w-[60px] sm:h-[60px] cursor-pointer rounded-full flex items-center justify-center transition-all duration-300 border-0 bg-white;
-
-    &:hover {
-      transform: scale(1.05);
-    }
-    &:hover svg {
-      @apply text-[#aaa];
-    }
-    &:active {
-      transform: scale(0.95);
-    }
-    &:disabled {
-      @apply opacity-50 cursor-not-allowed;
-    }
-  }
-  .vapi-mic-btn-active {
-    @apply bg-[#212a3b];
-  }
-  .vapi-mic-btn-inactive {
-    @apply bg-white;
   }
   .vapi-badge-ai {
     @apply inline-block bg-white px-3 py-2 rounded-[4px];
@@ -436,9 +401,6 @@
   .vapi-badge-ai-text {
     @apply text-sm font-medium text-[#212a3b];
     font-family: 'IBM Plex Serif', serif;
-  }
-  .vapi-status-indicator {
-    @apply flex items-center gap-2 bg-white px-3 py-2 rounded-[4px];
   }
   .vapi-status-dot {
     @apply inline-block w-3 h-3 rounded-full;
@@ -460,10 +422,6 @@
   }
   .vapi-status-dot-speaking {
     @apply bg-green-500 animate-pulse;
-  }
-  .vapi-status-text {
-    @apply text-sm font-medium text-[#212a3b];
-    font-family: 'IBM Plex Serif', serif;
   }
   .vapi-stat-box {
     @apply bg-white rounded-[10px] px-2.5 py-5 min-w-[225px] text-center;
@@ -487,8 +445,8 @@
      3D CONVERSATION STAGE
      =========================================== */
   .stage-shell {
-    @apply relative w-full overflow-hidden rounded-[20px] bg-[#060914] h-[540px] sm:h-[620px] lg:h-[680px];
-    box-shadow: 0 30px 60px -24px rgba(6, 9, 20, 0.6), 0 0 0 1px rgba(33, 42, 59, 0.2);
+    @apply relative w-full overflow-hidden rounded-[20px] bg-[#060914] h-[540px] sm:h-[620px] lg:h-[680px] animate-in fade-in duration-1000;
+    box-shadow: 0 30px 60px -24px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
   }
   .stage-canvas {
     @apply absolute inset-0;
@@ -610,7 +568,7 @@
      =========================================== */
   .hero3d-card {
     @apply relative overflow-hidden rounded-[20px] bg-[#060914] text-white grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:h-[560px];
-    box-shadow: 0 30px 60px -24px rgba(6, 9, 20, 0.6), 0 0 0 1px rgba(33, 42, 59, 0.2);
+    box-shadow: 0 30px 60px -24px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
   }
   .hero3d-copy {
     @apply relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left justify-center gap-4 p-6 sm:p-10 lg:pr-0;
@@ -680,7 +638,7 @@
     }
   }
   .library-search-wrapper {
-    @apply flex items-center bg-white border border-[var(--border-subtle)] rounded-lg overflow-hidden w-full sm:w-80;
+    @apply flex items-center bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-lg overflow-hidden w-full sm:w-80;
   }
   .library-search-input {
     @apply flex-1 py-2 px-4 outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)];
@@ -696,7 +654,7 @@
      TRANSCRIPT COMPONENT
      =========================================== */
   .transcript-container {
-    @apply w-full bg-white rounded-[14px] h-full min-h-0 flex flex-col;
+    @apply w-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-[14px] h-full min-h-0 flex flex-col;
   }
   .transcript-messages {
     @apply flex flex-col gap-4 sm:gap-6 p-4 sm:p-6 flex-1 overflow-y-auto scroll-smooth;
@@ -709,11 +667,11 @@
       background: transparent;
     }
     &::-webkit-scrollbar-thumb {
-      background: #d4c4a8;
+      background: rgba(255, 255, 255, 0.18);
       border-radius: 3px;
     }
     &::-webkit-scrollbar-thumb:hover {
-      background: #c4b498;
+      background: rgba(255, 255, 255, 0.3);
     }
   }
   .transcript-message {
@@ -729,13 +687,13 @@
     @apply max-w-[80%] px-6 py-4 text-base font-medium leading-7 rounded-2xl;
   }
   .transcript-bubble-user {
-    @apply bg-[#663820] text-white rounded-br-sm;
+    @apply bg-[#ffb454]/15 border border-[#ffb454]/35 text-[var(--text-primary)] rounded-br-sm;
   }
   .transcript-bubble-assistant {
-    @apply bg-[#f3e4c7] text-[#212a3b] rounded-bl-sm;
+    @apply bg-[#5ee7ff]/10 border border-[#5ee7ff]/30 text-[var(--text-primary)] rounded-bl-sm;
   }
   .transcript-cursor {
-    @apply inline-block w-0.5 h-5 ml-1 bg-black animate-pulse;
+    @apply inline-block w-0.5 h-5 ml-1 bg-white animate-pulse;
   }
   .transcript-empty {
     @apply flex flex-col items-center justify-center min-h-[350px] text-center flex-1;
@@ -766,10 +724,10 @@
     @apply bg-[var(--accent-light)] border-[var(--accent-warm)];
   }
   .voice-selector-option-default {
-    @apply bg-white;
+    @apply bg-[var(--bg-secondary)];
 
     &:hover {
-      @apply bg-[var(--bg-secondary)];
+      @apply bg-[var(--bg-tertiary)];
     }
   }
   .voice-selector-option-disabled {
@@ -777,105 +735,103 @@
   }
 
   /* ===========================================
-     BOOK CARD COMPONENT
+     3D BOOKSHELF
      =========================================== */
-  .book-card {
-    @apply flex flex-col transition-all duration-200 h-full border-0;
+  .shelf {
+    @apply relative flex flex-col gap-4;
+  }
+  .shelf-card {
+    @apply relative w-full overflow-hidden rounded-[20px] bg-[#0a1022] border border-[var(--border-subtle)];
+    box-shadow: var(--shadow-soft-lg);
+  }
+  .shelf-label {
+    @apply absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none text-center transition-opacity duration-200 opacity-80;
+  }
+  .shelf-label-active {
+    @apply opacity-100;
+  }
+  .shelf-label-title {
+    @apply font-serif text-sm md:text-base font-bold leading-5 text-[var(--text-primary)] line-clamp-1;
+  }
+  .shelf-label-author {
+    @apply text-xs md:text-sm leading-4 text-[var(--text-secondary)] line-clamp-1;
+  }
+  .shelf-label-active .shelf-label-title {
+    @apply text-[var(--accent-warm)];
+  }
+  .shelf-panel {
+    @apply sticky bottom-4 z-20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-[var(--border-medium)] bg-[#0f1730]/85 px-4 py-3 sm:px-5 backdrop-blur-md;
+    box-shadow: var(--shadow-soft-lg);
+  }
+  .shelf-panel-title {
+    @apply font-serif text-lg font-bold leading-6 text-[var(--text-primary)] line-clamp-1;
+  }
+  .shelf-panel-author {
+    @apply text-sm text-[var(--text-secondary)] line-clamp-1;
+  }
+  .shelf-panel-actions {
+    @apply flex shrink-0 gap-2.5;
+  }
+  .shelf-btn-primary,
+  .shelf-btn-secondary {
+    @apply inline-flex min-h-10 flex-1 sm:flex-none items-center justify-center gap-2 rounded-[10px] px-4 py-2 text-sm font-semibold cursor-pointer transition-all duration-200;
 
     &:hover {
-      transform: translateY(-4px);
+      transform: translateY(-2px);
+    }
+    &:focus-visible {
+      outline: 2px solid var(--accent-cool);
+      outline-offset: 2px;
     }
   }
-  .book-card-3d {
-    @apply relative w-full transition-transform duration-200;
+  .shelf-btn-primary {
+    @apply text-[var(--on-brand)];
+    background: linear-gradient(135deg, #ffcb7d 0%, #ffb454 100%);
+    box-shadow: 0 8px 22px rgba(255, 180, 84, 0.28);
   }
-  .book-card-3d-hover {
-    @apply group-hover:-translate-y-1;
-  }
-  .book-card-spine {
-    @apply absolute -left-1 top-2 bottom-2 w-3 bg-gradient-to-r from-[#8B7355] to-[#A08060] rounded-l-md z-0;
-  }
-  .book-card-cover-wrapper {
-    @apply relative bg-white rounded-[14px] overflow-hidden flex items-center justify-center h-[205px] md:h-[240px];
-    perspective: 900px;
-  }
-  .book-card-cover {
-    @apply w-auto h-[170px] md:h-[200px] object-cover rounded-lg;
-    box-shadow: var(--shadow-book);
-  }
-  /* A real 3D book: cover in front, page block and spine on the sides, back cover behind */
-  .book-3d {
-    @apply relative;
-    --book-half-depth: 10px;
-    transform-style: preserve-3d;
-    transform: rotateX(var(--book-rx, 0deg)) rotateY(var(--book-ry, -22deg));
-    transition: transform 0.3s ease-out;
+  .shelf-btn-secondary {
+    @apply border border-[var(--border-medium)] bg-white/[0.06] text-[var(--text-primary)];
 
-    &::after {
-      content: '';
-      @apply absolute inset-0 rounded-[3px] bg-[#3b2416];
-      transform: translateZ(calc(var(--book-half-depth) * -1));
-      box-shadow: -16px 14px 28px rgba(33, 42, 59, 0.3);
+    &:hover {
+      @apply bg-white/[0.12];
     }
   }
-  .book-3d .book-card-cover {
-    @apply block rounded-[3px];
-    transform: translateZ(var(--book-half-depth));
-    box-shadow: none;
+  .shelf-empty {
+    @apply rounded-[20px] border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-6 py-14 text-center text-[var(--text-secondary)];
   }
-  .book-3d-pages,
-  .book-3d-spine {
-    @apply absolute top-[3px] bottom-[3px];
-    width: calc(var(--book-half-depth) * 2);
+  /* Fades the whole screen to the stage colour while the camera flies into a book */
+  .shelf-flyout {
+    @apply fixed inset-0 z-[100] bg-[#060914] animate-in fade-in duration-700;
   }
-  .book-3d-pages {
-    @apply right-0;
-    transform: translateX(var(--book-half-depth)) rotateY(90deg);
-    background: repeating-linear-gradient(90deg, #fffaf0 0 2px, #e3d6bb 2px 3px);
-  }
-  .book-3d-spine {
-    @apply left-0 top-0 bottom-0;
-    transform: translateX(calc(var(--book-half-depth) * -1)) rotateY(90deg);
-    background: linear-gradient(90deg, #2a180e, #663820 50%, #2a180e);
-  }
-  .book-card-meta {
-    @apply mt-4 md:mt-5 flex-1 flex flex-col gap-1;
-  }
-  .book-card-title {
-    @apply font-bold text-[#212a3b] line-clamp-1 text-base md:text-xl leading-[22px] md:leading-[30px];
-    font-family: 'IBM Plex Serif', serif;
-  }
-  .book-card-author {
-    @apply text-sm md:text-base font-medium text-[#3d485e] line-clamp-1;
-  }
+
   /* ===========================================
      UPLOAD FORM COMPONENT
      =========================================== */
   .upload-dropzone {
-    @apply flex flex-col items-center justify-center h-[165px] bg-white rounded-[6px] cursor-pointer transition-all;
+    @apply flex flex-col items-center justify-center h-[165px] bg-[var(--bg-secondary)] rounded-[6px] cursor-pointer transition-all;
 
     &:hover {
-      @apply bg-gray-50;
+      @apply bg-[var(--bg-tertiary)];
     }
   }
   .upload-dropzone-uploaded {
-    @apply bg-[#f3e4c7];
+    @apply bg-[#ffb454]/10;
 
     .upload-dropzone-text {
-      @apply text-[#663820];
+      @apply text-[#ffb454];
     }
     .upload-dropzone-hint {
-      @apply text-[#8B7355];
+      @apply text-[var(--text-secondary)];
     }
   }
   .upload-dropzone-icon {
-    @apply w-[48px] h-[48px] mb-2 text-[#8B7355];
+    @apply w-[48px] h-[48px] mb-2 text-[#5ee7ff];
   }
   .upload-dropzone-text {
-    @apply text-[#777] text-lg font-medium text-center;
+    @apply text-[var(--text-secondary)] text-lg font-medium text-center;
   }
   .upload-dropzone-hint {
-    @apply text-[#777] text-sm mt-1;
+    @apply text-[var(--text-secondary)] text-sm mt-1;
   }
   .upload-dropzone-remove {
     @apply flex items-center justify-center w-6 h-6 text-red-500 transition-colors cursor-pointer;
@@ -885,17 +841,17 @@
     }
   }
   .form-label {
-    @apply text-lg font-medium text-black mb-2 block;
+    @apply text-lg font-medium text-[var(--text-primary)] mb-2 block;
   }
   .form-input {
-    @apply w-full p-4 bg-white rounded-lg text-lg font-medium text-[#222] placeholder:text-[#999];
+    @apply w-full p-4 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-lg text-lg font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)];
   }
 
   /* ===========================================
      BACK BUTTON (FLOATING)
      =========================================== */
   .back-btn-floating {
-    @apply fixed top-24 left-6 z-50 size-12 rounded-full bg-white border border-[var(--border-subtle)] flex items-center justify-center transition-all;
+    @apply fixed top-24 left-6 z-50 size-12 rounded-full bg-[var(--bg-secondary)] border border-[var(--border-subtle)] flex items-center justify-center transition-all;
     box-shadow: var(--shadow-soft);
 
     &:hover {
@@ -910,12 +866,12 @@
   border: none !important;
   box-shadow: var(--shadow-soft) !important;
   border-radius: 0.75rem !important;
-  background-color: #212a3b !important;
-  color: white !important;
+  background-color: #ffb454 !important;
+  color: #1a0f02 !important;
 }
 
 .cl-formButtonPrimary:hover {
-  background-color: #3d485e !important;
+  background-color: #ffcb7d !important;
   box-shadow: var(--shadow-soft-md) !important;
 }
 
@@ -944,14 +900,14 @@
   position: relative !important;
   z-index: 10 !important;
   border: 1px solid var(--border-subtle) !important;
-  background-color: white !important;
+  background-color: #0f1730 !important;
   box-shadow: var(--shadow-soft-sm) !important;
   border-radius: 0.75rem !important;
 }
 
 .cl-formFieldInput:focus {
-  border-color: #212a3b !important;
-  box-shadow: var(--shadow-soft), 0 0 0 2px rgba(33, 42, 59, 0.1) !important;
+  border-color: #5ee7ff !important;
+  box-shadow: var(--shadow-soft), 0 0 0 2px rgba(94, 231, 255, 0.2) !important;
 }
 
 /* Clerk Auth Social Buttons with Soft Shadow */
@@ -997,7 +953,7 @@
   z-index: 1;
   border: 1px solid var(--border-subtle) !important;
   border-radius: 1rem !important;
-  background-color: white !important;
+  background-color: #0f1730 !important;
   box-shadow: var(--shadow-soft-md) !important;
 }
 
@@ -1011,7 +967,7 @@
 .cl-modalContent .cl-formButtonPrimary,
 .cl-checkoutForm .cl-formButtonPrimary,
 [data-clerk-component] button[class*='formButtonPrimary'] {
-  color: white !important;
+  color: #1a0f02 !important;
 }
 
 /* Clerk checkout pay button - target primary/solid buttons */
@@ -1020,14 +976,14 @@ button[class*='cl-button'][data-variant='solid'][data-color='primary'],
 button[class*='cl-button'][data-variant='solid'][data-color='primary'] *,
 .cl-main button[type='submit'][class*='formButtonPrimary'],
 .cl-footer button[class*='formButtonPrimary'] {
-  color: white !important;
+  color: #1a0f02 !important;
 }
 
 /* Global Clerk portal/overlay PRIMARY button fix */
 [id^='cl-'] button[class*='formButtonPrimary'],
 [class^='cl-'] button[class*='formButtonPrimary'],
 .cl-modalBackdrop ~ div button[class*='formButtonPrimary'] {
-  color: white !important;
+  color: #1a0f02 !important;
 }
 
 /* Force white text on Clerk PRIMARY buttons only (not segmented controls, tabs, etc.) */
@@ -1035,7 +991,7 @@ button[class*='cl-button'][data-variant='solid'][data-color='primary'] *,
 [class*='cl-'] button[class*='formButtonPrimary'] *,
 button[class*='cl-formButtonPrimary'],
 button[class*='cl-formButtonPrimary'] * {
-  color: white !important;
+  color: #1a0f02 !important;
 }
 
 /* Ensure segmented controls, tabs, and other light buttons have dark text */
@@ -1049,13 +1005,13 @@ button[data-variant='unstyled'] *,
 .cl-tabButton *,
 [role='tablist'] button,
 [role='tablist'] button * {
-  color: #212a3b !important;
+  color: #f2f5fb !important;
 }
 
 /* Card sections have white background */
 .clerk-pricing-table-wrapper [class*='card'] > *,
 .clerk-pricing-table-wrapper > div > div > div > * {
-  background-color: white !important;
+  background-color: #0f1730 !important;
 }
 
 /* All buttons */
@@ -1063,8 +1019,8 @@ button[data-variant='unstyled'] *,
   height: 3rem !important;
   min-height: 3rem !important;
   font-size: 1.125rem !important;
-  background-color: #212a3b !important;
-  color: white !important;
+  background-color: #ffb454 !important;
+  color: #1a0f02 !important;
   font-weight: 500 !important;
   border: none !important;
   box-shadow: var(--shadow-soft) !important;
@@ -1074,7 +1030,7 @@ button[data-variant='unstyled'] *,
 }
 
 .clerk-pricing-table-wrapper button:hover {
-  background-color: #3d485e !important;
+  background-color: #ffcb7d !important;
   box-shadow: var(--shadow-soft-md) !important;
   transform: translateY(-1px);
 }
@@ -1083,8 +1039,8 @@ button[data-variant='unstyled'] *,
 .clerk-pricing-table-wrapper button:disabled,
 .clerk-pricing-table-wrapper button[disabled],
 .clerk-pricing-table-wrapper button[aria-disabled='true'] {
-  background-color: #f3e4c7 !important;
-  color: #212a3b !important;
+  background-color: rgba(255, 180, 84, 0.16) !important;
+  color: #f2f5fb !important;
   cursor: default !important;
   box-shadow: none !important;
   opacity: 1 !important;
@@ -1096,15 +1052,15 @@ button[data-variant='unstyled'] *,
    Note: This uses :first-child which assumes active plan is always first.
    If Clerk changes the order, this may highlight the wrong card. */
 .cl-pricingTableCard:first-child {
-  border: 2px solid #663820 !important;
+  border: 2px solid #ffb454 !important;
 }
 
 /* Style the Active badge with better contrast */
 .cl-badge,
 .cl-pricingTableCard [class*='badge'],
 .cl-pricingTableCard span[class*='Badge'] {
-  background-color: #663820 !important;
-  color: white !important;
+  background-color: #ffb454 !important;
+  color: #1a0f02 !important;
   font-weight: 600 !important;
   padding: 0.25rem 0.75rem !important;
   border-radius: 9999px !important;
@@ -1119,8 +1075,8 @@ button[data-variant='unstyled'] *,
   text-align: center;
   padding: 0.75rem 1.5rem;
   margin-top: 1rem;
-  background-color: #f3e4c7 !important;
-  color: #212a3b !important;
+  background-color: rgba(255, 180, 84, 0.16) !important;
+  color: #f2f5fb !important;
   font-weight: 600;
   border-radius: 0.75rem;
   font-size: 1.125rem;
