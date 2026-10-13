@@ -5,7 +5,7 @@ import Vapi from '@vapi-ai/web';
 import { useAuth } from '@clerk/nextjs';
 
 import { ASSISTANT_ID, DEFAULT_VOICE, HINGLISH_ASSISTANT_ID, VOICE_SETTINGS } from '@/lib/constants';
-import { getVoice } from '@/lib/utils';
+import { getHinglishVoice, getVoice, isVapiNativeVoice } from '@/lib/utils';
 import { IBook, Messages } from '@/types';
 import { startVoiceSession, endVoiceSession } from '@/lib/actions/session.actions';
 import { useSubscriptionPlan } from '@/hooks/useSubscriptionPlan';
@@ -40,8 +40,6 @@ const VAPI_CONFIGS: Record<VapiLanguage, { apiKey?: string; assistantId?: string
         assistantEnv: 'NEXT_PUBLIC_HINGLISH_ASSISTANT_ID',
     },
 };
-
-export const IS_HINGLISH_AVAILABLE = Boolean(VAPI_CONFIGS.hinglish.apiKey && VAPI_CONFIGS.hinglish.assistantId);
 
 const vapiClients: Partial<Record<VapiLanguage, InstanceType<typeof Vapi>>> = {};
 function getVapi(language: VapiLanguage) {
@@ -305,6 +303,7 @@ export function useVapi(book: IBook, language: VapiLanguage = 'english') {
             );
 
             const firstMessage = getFirstMessage(language, book.title);
+            const activeVoice = language === 'hinglish' ? getHinglishVoice(voice) : getVoice(voice);
 
             await getVapi(language).start(VAPI_CONFIGS[language].assistantId, {
                 firstMessage,
@@ -313,15 +312,21 @@ export function useVapi(book: IBook, language: VapiLanguage = 'english') {
                     author: book.author,
                     bookId: book._id,
                 },
-                voice: {
-                    provider: '11labs' as const,
-                    voiceId: getVoice(voice).id,
-                    model: 'eleven_turbo_v2_5' as const,
-                    stability: VOICE_SETTINGS.stability,
-                    similarityBoost: VOICE_SETTINGS.similarityBoost,
-                    style: VOICE_SETTINGS.style,
-                    useSpeakerBoost: VOICE_SETTINGS.useSpeakerBoost,
-                },
+                // Indian-accent voices (सागर/नैना) are Vapi-native; Hinglish always uses one of them
+                voice: isVapiNativeVoice(activeVoice.id)
+                    ? {
+                        provider: 'vapi' as const,
+                        voiceId: activeVoice.id,
+                    }
+                    : {
+                        provider: '11labs' as const,
+                        voiceId: activeVoice.id,
+                        model: 'eleven_turbo_v2_5' as const,
+                        stability: VOICE_SETTINGS.stability,
+                        similarityBoost: VOICE_SETTINGS.similarityBoost,
+                        style: VOICE_SETTINGS.style,
+                        useSpeakerBoost: VOICE_SETTINGS.useSpeakerBoost,
+                    },
             });
         } catch (err) {
             console.error('Failed to start call:', err);

@@ -1,7 +1,9 @@
 'use client';
 
 import { Mic, MicOff } from "lucide-react";
-import useVapi, { IS_HINGLISH_AVAILABLE, VapiLanguage } from "@/hooks/useVapi";
+import useVapi, { VapiLanguage } from "@/hooks/useVapi";
+import { IS_HINGLISH_AVAILABLE } from "@/lib/constants";
+import { getHinglishVoice } from "@/lib/utils";
 import { IBook } from "@/types";
 import Image from "next/image";
 import Transcript from "@/components/Transcript";
@@ -97,7 +99,11 @@ const VapiControls = ({ book }: { book: IBook }) => {
                         </div>
 
                         <div className="vapi-status-indicator">
-                            <span className="vapi-status-text">Voice: {book.persona || 'Default'}</span>
+                            <span className="vapi-status-text">
+                                Voice: {language === 'hinglish'
+                                    ? getHinglishVoice(book.persona).name
+                                    : book.persona || 'Default'}
+                            </span>
                         </div>
 
                         <div className="vapi-status-indicator">

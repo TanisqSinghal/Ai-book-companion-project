@@ -97,6 +97,7 @@ export const ASSISTANT_ID = process.env.NEXT_PUBLIC_ASSISTANT_ID!;
 
 // Optional Hinglish assistant (separate Vapi account) - toggle is hidden when not configured
 export const HINGLISH_ASSISTANT_ID = process.env.NEXT_PUBLIC_HINGLISH_ASSISTANT_ID;
+export const IS_HINGLISH_AVAILABLE = Boolean(process.env.NEXT_PUBLIC_VAPI_HINGLISH_API_KEY && HINGLISH_ASSISTANT_ID);
 
 // 11Labs Voice IDs - Optimized for conversational AI
 // Voices selected for natural, engaging book conversations
@@ -105,16 +106,21 @@ export const voiceOptions = {
     dave: { id: 'CYw3kZ02Hs0563khs1Fj', name: 'Dave', description: 'Young male, British-Essex, casual & conversational' },
     daniel: { id: 'onwK4e9ZLuTAKqWW03F9', name: 'Daniel', description: 'Middle-aged male, British, authoritative but warm' },
     chris: { id: 'iP95p4xoKVk53GoZ742B', name: 'Chris', description: 'Male, casual & easy-going' },
+    sagar: { id: 'Sagar', name: 'सागर', description: 'पुरुष, भारतीय लहजा, गर्मजोशी भरा अंदाज़' },
     // Female voices
     rachel: { id: '21m00Tcm4TlvDq8ikWAM', name: 'Rachel', description: 'Young female, American, calm & clear' },
     sarah: { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah', description: 'Young female, American, soft & approachable' },
+    naina: { id: 'Naina', name: 'नैना', description: 'महिला, भारतीय लहजा, साफ़ और दोस्ताना' },
 };
 
 // Voice categories for the selector UI
 export const voiceCategories = {
-    male: ['dave', 'daniel', 'chris'],
-    female: ['rachel', 'sarah'],
+    male: ['dave', 'daniel', 'chris', 'sagar'],
+    female: ['rachel', 'sarah', 'naina'],
 };
+
+// Indian-accent voices served by Vapi itself (all other voices are ElevenLabs)
+export const VAPI_NATIVE_VOICES = ['sagar', 'naina'];
 
 // Default voice
 export const DEFAULT_VOICE = 'rachel';
