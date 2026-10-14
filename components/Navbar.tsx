@@ -18,9 +18,9 @@ const Navbar = () => {
   return (
     <header className="w-full fixed z-50 bg-(--bg-primary)/85 backdrop-blur-md border-b border-(--border-subtle)">
       <div className="wrapper navbar-height py-4 flex justify-between items-center">
-        <Link href="/" className="flex gap-0.5 items-center">
-          <Image src="/assets/logo.png" alt="libroAi" width={42} height={26} className="invert" />
-          <span className="logo-text">LibroAi</span>
+        <Link href="/" className="flex gap-2 items-center">
+          <Image src="/assets/lumora-mark.png" alt="Lumora" width={40} height={40} priority />
+          <span className="logo-text">Lumora</span>
         </Link>
 
         <nav className="w-fit flex gap-7.5 items-center">
