@@ -15,7 +15,7 @@ export interface SubscriptionPlanLimits {
 export const SUBSCRIPTION_LIMITS: Record<PlanType, SubscriptionPlanLimits> = {
     free: {
         maxBooks: 1,
-        maxSessionsPerMonth: 5,
+        maxSessionsPerMonth: 10,
         maxSessionMinutes: 5,
         hasSessionHistory: false,
     },
