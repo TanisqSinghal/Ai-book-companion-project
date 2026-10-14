@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { BOOK_HEIGHT } from '@/components/stage/bookSize';
 import { LABEL_DROP, SPACING_X, columnsForWidth, layoutShelf } from '@/components/shelf/layout';
 import type { ShelfBook } from '@/components/shelf/layout';
+import { useInView } from '@/hooks/useInView';
 
 // WebGL only exists in the browser, so the 3D shelf is never server-rendered
 const ShelfScene = dynamic(() => import('@/components/shelf/ShelfScene'), {
@@ -27,6 +28,7 @@ const Bookshelf = ({ books }: { books: ShelfBook[] }) => {
     const router = useRouter();
 
     const [container, setContainer] = useState<HTMLDivElement | null>(null);
+    const inView = useInView(container);
     const [containerWidth, setContainerWidth] = useState(0);
     const [hovered, setHovered] = useState<number | null>(null);
     const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -76,6 +78,7 @@ const Bookshelf = ({ books }: { books: ShelfBook[] }) => {
             <div ref={setContainer} className="shelf-card" style={{ aspectRatio: `${width} / ${height}` }}>
                 {containerWidth > 0 && (
                     <ShelfScene
+                        active={inView}
                         books={books}
                         columns={columns}
                         hovered={hovered}

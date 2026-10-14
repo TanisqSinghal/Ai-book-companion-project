@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment, Lightformer, Sparkles, useCursor } from '@react-three/drei';
 import { Bloom, EffectComposer, ToneMapping } from '@react-three/postprocessing';
@@ -8,6 +8,7 @@ import { ToneMappingMode } from 'postprocessing';
 import * as THREE from 'three';
 
 import Book3D from '@/components/stage/Book3D';
+import AdaptiveDpr, { MAX_DPR } from '@/components/stage/AdaptiveDpr';
 import { AI_COLOR } from '@/components/stage/Robot';
 import { USER_COLOR } from '@/components/stage/Human';
 import { PLANK_THICKNESS, layoutShelf } from '@/components/shelf/layout';
@@ -102,20 +103,27 @@ export interface ShelfSceneProps {
     launching: number | null;
     onHover: (index: number, entered: boolean) => void;
     onSelect: (index: number) => void;
+    // False while the shelf is scrolled out of view, so it stops rendering frames
+    active?: boolean;
 }
 
-const ShelfScene = ({ books, columns, hovered, launching, onHover, onSelect }: ShelfSceneProps) => {
+const ShelfScene = ({ books, columns, hovered, launching, onHover, onSelect, active = true }: ShelfSceneProps) => {
     const { width, height, slots, plankHeights } = layoutShelf(books, columns);
+    const [dpr, setDpr] = useState<number | [number, number]>(MAX_DPR);
     const target = launching === null ? null : slots[launching] ?? null;
 
     useCursor(hovered !== null && launching === null);
 
     return (
         <Canvas
-            dpr={[1, 1.75]}
+            dpr={dpr}
+            frameloop={active ? 'always' : 'never'}
+            // The composer does its own anti-aliasing, so the default framebuffer doesn't need it
+            gl={{ antialias: false, powerPreference: 'high-performance' }}
             camera={{ fov: FOV, near: 0.1, far: 500, position: [0, 0, homeDistance(height)] }}
             fallback={<p className="stage-fallback">3D view is not supported on this device.</p>}
         >
+            <AdaptiveDpr onChange={setDpr} />
             <color attach="background" args={[BACKDROP]} />
 
             {/* Kept soft so pale covers stay readable instead of blooming white */}
@@ -168,7 +176,7 @@ const ShelfScene = ({ books, columns, hovered, launching, onHover, onSelect }: S
                 color="#9fdcff"
             />
 
-            <EffectComposer>
+            <EffectComposer multisampling={4}>
                 <Bloom mipmapBlur intensity={0.8} luminanceThreshold={1} luminanceSmoothing={0.25} />
                 <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
             </EffectComposer>

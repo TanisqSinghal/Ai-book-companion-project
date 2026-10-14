@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import type { CallStatus } from '@/hooks/useVapi';
 import { detectMood } from '@/lib/mood';
+import { useInView } from '@/hooks/useInView';
 import AgentIntro from '@/components/stage/AgentIntro';
 
 // WebGL only exists in the browser, so the 3D stage is never server-rendered
@@ -33,6 +34,8 @@ const LEVEL_INTERVAL_MS = 60;
 
 const HeroStage = () => {
     const [beatIndex, setBeatIndex] = useState(0);
+    const [scene, setScene] = useState<HTMLDivElement | null>(null);
+    const inView = useInView(scene);
     const aiLevel = useRef(0);
     const userLevel = useRef(0);
 
@@ -61,9 +64,10 @@ const HeroStage = () => {
     }, []);
 
     return (
-        <div className="hero3d-scene">
+        <div ref={setScene} className="hero3d-scene">
             <div className="stage-canvas" aria-hidden="true">
                 <ConversationStage
+                    active={inView}
                     status={beat.status}
                     aiLevel={aiLevel}
                     userLevel={userLevel}

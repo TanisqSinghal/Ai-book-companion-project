@@ -12,6 +12,7 @@ import Image from "next/image";
 import Transcript from "@/components/Transcript";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useInView } from "@/hooks/useInView";
 
 // WebGL only exists in the browser, so the 3D stage is never server-rendered
 const ConversationStage = dynamic(() => import("@/components/stage/ConversationStage"), {
@@ -43,6 +44,8 @@ const LANGUAGE_OPTIONS: { value: VapiLanguage; label: string }[] = [
 const VapiControls = ({ book }: { book: IBook }) => {
     const router = useRouter();
     const [language, setLanguage] = useState<VapiLanguage>('english');
+    const [stage, setStage] = useState<HTMLDivElement | null>(null);
+    const stageInView = useInView(stage);
 
     const { status,
         isActive,
@@ -87,8 +90,9 @@ const VapiControls = ({ book }: { book: IBook }) => {
     return (
         <>
             <section className="stage-shell" aria-label={`Voice conversation about ${book.title}`}>
-                <div className="stage-canvas">
+                <div ref={setStage} className="stage-canvas">
                     <ConversationStage
+                        active={stageInView}
                         status={status}
                         aiLevel={assistantVolumeRef}
                         userLevel={micLevelRef}

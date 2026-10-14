@@ -8,7 +8,10 @@ const HeroSection = () => {
         <section className="hero3d-section mb-10 md:mb-16">
             <div className="hero3d-card">
                 <div className="hero3d-copy">
-                    <h1 className="hero3d-title">Your Library</h1>
+                    <h1 className="hero3d-title">
+                        <span className="hero3d-shine">Your</span>{" "}
+                        <span className="hero3d-title-glow">Library</span>
+                    </h1>
                     <p className="hero3d-description">
                         Convert your books into interactive AI conversations. <br className="hidden md:block" />
                         Listen, learn, and discuss your favorite reads.

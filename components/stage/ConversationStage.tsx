@@ -1,6 +1,6 @@
 'use client';
 
-import { Component, Suspense, useMemo, useRef } from 'react';
+import { Component, Suspense, useMemo, useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment, Float, Lightformer, Sparkles, Stars } from '@react-three/drei';
@@ -14,6 +14,7 @@ import Robot, { AI_COLOR } from '@/components/stage/Robot';
 import Human, { USER_COLOR } from '@/components/stage/Human';
 import AvatarHuman from '@/components/stage/AvatarHuman';
 import Book3D from '@/components/stage/Book3D';
+import AdaptiveDpr, { MAX_DPR } from '@/components/stage/AdaptiveDpr';
 import {
     ENTRANCE_LENGTH,
     RING_ON_AT,
@@ -78,6 +79,8 @@ export interface ConversationStageProps {
     coverURL?: string;
     aiMood?: Mood;
     userMood?: Mood;
+    // False while the stage is scrolled out of view, so it stops rendering frames
+    active?: boolean;
 }
 
 type SpeakerProps = Pick<ConversationStageProps, 'status' | 'aiLevel' | 'userLevel' | 'userSpeaking'>;
@@ -475,7 +478,9 @@ const ConversationStage = ({
     coverURL,
     aiMood = 'neutral',
     userMood = 'neutral',
+    active = true,
 }: ConversationStageProps) => {
+    const [dpr, setDpr] = useState<number | [number, number]>(MAX_DPR);
     const sequenceRef = useRef<number | null>(null);
     const energyRef = useRef({ ai: 0, user: 0 });
     const dollyRef = useRef(0);
@@ -484,10 +489,14 @@ const ConversationStage = ({
 
     return (
         <Canvas
-            dpr={[1, 1.75]}
+            dpr={dpr}
+            frameloop={active ? 'always' : 'never'}
+            // The composer does its own anti-aliasing, so the default framebuffer doesn't need it
+            gl={{ antialias: false, powerPreference: 'high-performance' }}
             camera={{ fov: 35, near: 0.1, far: 90, position: CAMERA_ENTRANCE }}
             fallback={<p className="stage-fallback">3D view is not supported on this device.</p>}
         >
+            <AdaptiveDpr onChange={setDpr} />
             <color attach="background" args={[BACKDROP]} />
             <fog attach="fog" args={[BACKDROP, 13, 34]} />
 
@@ -545,7 +554,7 @@ const ConversationStage = ({
             <ReactiveDust energyRef={energyRef} />
             <Stars radius={45} depth={30} count={1400} factor={3.2} fade speed={0.6} />
 
-            <EffectComposer>
+            <EffectComposer multisampling={4}>
                 <Bloom mipmapBlur intensity={0.95} luminanceThreshold={1} luminanceSmoothing={0.25} />
                 <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
             </EffectComposer>
