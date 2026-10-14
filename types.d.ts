@@ -38,6 +38,14 @@ export interface IBookSegment extends Document {
     updatedAt: Date;
 }
 
+export type SessionMessageRole = 'user' | 'assistant';
+
+export interface ISessionMessage {
+    role: SessionMessageRole;
+    content: string;
+    createdAt: Date;
+}
+
 export interface IVoiceSession extends Document {
     _id: string;
     clerkId: string;
@@ -46,6 +54,7 @@ export interface IVoiceSession extends Document {
     endedAt?: Date;
     durationSeconds: number;
     billingPeriodStart: Date;
+    messages: ISessionMessage[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -147,4 +156,29 @@ export interface CreateBookResult {
 export interface EndSessionResult {
     success: boolean;
     error?: string;
+}
+
+export interface SessionBookSummary {
+    _id: string;
+    title: string;
+    author: string;
+    slug: string;
+    coverURL?: string;
+}
+
+export interface SessionHistoryItem {
+    _id: string;
+    startedAt: string;
+    durationSeconds: number;
+    messageCount: number;
+    preview?: string;
+    book?: SessionBookSummary;
+}
+
+export interface SessionDetail {
+    _id: string;
+    startedAt: string;
+    durationSeconds: number;
+    messages: { role: SessionMessageRole; content: string; createdAt: string }[];
+    book?: SessionBookSummary;
 }

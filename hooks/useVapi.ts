@@ -7,7 +7,7 @@ import { useAuth } from '@clerk/nextjs';
 import { ASSISTANT_ID, DEFAULT_VOICE, HINGLISH_ASSISTANT_ID, VOICE_SETTINGS } from '@/lib/constants';
 import { getHinglishVoice, getVoice } from '@/lib/utils';
 import { IBook, Messages } from '@/types';
-import { startVoiceSession, endVoiceSession } from '@/lib/actions/session.actions';
+import { startVoiceSession, endVoiceSession, saveSessionMessage } from '@/lib/actions/session.actions';
 import { useSubscriptionPlan } from '@/hooks/useSubscriptionPlan';
 
 export function useLatestRef<T>(value: T) {
@@ -98,6 +98,9 @@ export function useVapi(book: IBook, language: VapiLanguage = 'english') {
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const startTimeRef = useRef<number | null>(null);
     const sessionIdRef = useRef<string | null>(null);
+    // Unlike sessionIdRef this survives 'call-end', so final transcripts that arrive late are still saved
+    const historySessionIdRef = useRef<string | null>(null);
+    const savedMessageKeysRef = useRef(new Set<string>());
     const isStoppingRef = useRef(false);
     // Assistant loudness (0-1), kept in a ref so the 3D stage can read it per frame
     const assistantVolumeRef = useRef(0);
@@ -217,6 +220,20 @@ export function useVapi(book: IBook, language: VapiLanguage = 'english') {
                     if (message.role === 'assistant') setCurrentMessage('');
                     if (message.role === 'user') setCurrentUserMessage('');
 
+                    // Same duplicate rule as the on-screen transcript below
+                    const historySessionId = historySessionIdRef.current;
+                    const messageKey = `${message.role}:${message.transcript}`;
+                    if (
+                        historySessionId &&
+                        (message.role === 'user' || message.role === 'assistant') &&
+                        !savedMessageKeysRef.current.has(messageKey)
+                    ) {
+                        savedMessageKeysRef.current.add(messageKey);
+                        saveSessionMessage(historySessionId, message.role, message.transcript).catch((err) =>
+                            console.error('Failed to save conversation message:', err),
+                        );
+                    }
+
                     setMessages((prev) => {
                         const isDupe = prev.some(
                             (m) => m.role === message.role && m.content === message.transcript,
@@ -322,6 +339,8 @@ export function useVapi(book: IBook, language: VapiLanguage = 'english') {
             }
 
             sessionIdRef.current = result.sessionId || null;
+            historySessionIdRef.current = result.sessionId || null;
+            savedMessageKeysRef.current = new Set();
             setMaxDurationSeconds(
                 (result.maxDurationMinutes ?? limits.maxSessionMinutes) * SECONDS_PER_MINUTE,
             );

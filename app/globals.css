@@ -706,6 +706,46 @@
   }
 
   /* ===========================================
+     CONVERSATION HISTORY
+     =========================================== */
+  .history-list {
+    @apply flex flex-col gap-3;
+  }
+  .history-card {
+    @apply flex items-start sm:items-center gap-4 rounded-[14px] border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4 transition-colors hover:border-[var(--border-medium)] hover:bg-[var(--bg-tertiary)];
+  }
+  .history-card-cover {
+    @apply shrink-0 rounded-md object-cover;
+  }
+  .history-card-title {
+    @apply font-serif text-lg font-bold leading-6 text-[var(--text-primary)] line-clamp-1;
+  }
+  .history-card-author {
+    @apply text-sm text-[var(--text-secondary)] line-clamp-1;
+  }
+  .history-card-preview {
+    @apply mt-2 text-sm text-[var(--text-muted)] line-clamp-2;
+  }
+  .history-card-meta {
+    @apply hidden sm:flex shrink-0 flex-col items-end gap-1 text-xs text-[var(--text-muted)];
+  }
+  .history-empty {
+    @apply flex flex-col items-center text-center rounded-[14px] border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-6 py-14;
+  }
+  .history-empty-cta {
+    @apply mt-6 rounded-[10px] bg-[var(--accent-warm)] px-5 py-2.5 font-medium text-[#1a0f02] transition-colors hover:bg-[var(--accent-warm-hover)];
+  }
+  .history-detail-header {
+    @apply flex flex-col sm:flex-row sm:items-center gap-4;
+  }
+  .history-detail-meta {
+    @apply mt-2 text-sm text-[var(--text-muted)];
+  }
+  .history-continue-btn {
+    @apply flex w-fit items-center gap-2 rounded-[10px] bg-[var(--accent-warm)] px-5 py-2.5 font-medium text-[#1a0f02] transition-colors hover:bg-[var(--accent-warm-hover)];
+  }
+
+  /* ===========================================
      VOICE SELECTOR COMPONENT
      =========================================== */
   .voice-selector-options {
