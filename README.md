@@ -1,6 +1,10 @@
-# 📚 LibroAI — AI-Powered Book Companion
+<p align="center">
+  <img src="./public/assets/lumora-logo.png" alt="Lumora" width="420" />
+</p>
 
-LibroAI is a full-stack AI application that transforms static books into **interactive conversational experiences**. Users can upload PDFs and interact with them through a voice-enabled assistant that understands and responds based on the book’s content.
+# 📚 Lumora — AI-Powered Book Companion
+
+Lumora is a full-stack AI application that transforms static books into **interactive conversational experiences**. Users can upload PDFs and interact with them through a voice-enabled assistant that understands and responds based on the book’s content.
 
 ---
 

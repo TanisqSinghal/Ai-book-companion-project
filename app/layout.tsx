@@ -3,6 +3,7 @@ import { IBM_Plex_Serif, Mona_Sans} from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 
 import Navbar from "@/components/Navbar";
+import CosmicBackground from "@/components/CosmicBackground";
 import "./globals.css";
 import {Toaster} from "@/components/ui/sonner";
 
@@ -36,7 +37,7 @@ const clerkAppearance = {
 };
 
 export const metadata: Metadata = {
-  title: "LibroAi",
+  title: "Lumora",
   description: "Transform your books into interactive AI conversations. Upload PDFs, and chat with your books using voice.",
 };
 
@@ -51,6 +52,7 @@ export default function RootLayout({
           <body
             className={`${ibmPlexSerif.variable} ${monaSans.variable} relative font-sans antialiased`}
           >
+            <CosmicBackground />
             <Navbar />
             {children}
             <Toaster />
