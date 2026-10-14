@@ -27,6 +27,11 @@ const page = async ({ params }: SessionPageProps) => {
     const { sessionId } = await params;
     const result = await getSessionById(sessionId);
 
+    // The history list explains the paid-plan requirement
+    if (result.requiresUpgrade) {
+        redirect("/history");
+    }
+
     if (!result.success || !result.data) {
         notFound();
     }

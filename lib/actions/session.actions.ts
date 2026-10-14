@@ -12,6 +12,9 @@ import mongoose from "mongoose";
 
 const MAX_MESSAGE_LENGTH = 5000;
 const HISTORY_PAGE_SIZE = 50;
+const HISTORY_UPGRADE_ERROR = "Conversation history is available on paid plans.";
+
+type HistoryResult<T> = { success: boolean; data?: T; error?: string; requiresUpgrade?: boolean };
 
 
 export const startVoiceSession = async (clerkId: string, bookId: string): Promise<StartSessionResult> => {
@@ -150,11 +153,16 @@ export const saveSessionMessage = async (
     }
 }
 
-export const getSessionHistory = async (): Promise<{ success: boolean; data?: SessionHistoryItem[]; error?: string }> => {
+export const getSessionHistory = async (): Promise<HistoryResult<SessionHistoryItem[]>> => {
     try {
-        const { userId } = await auth();
+        const { userId, limits } = await getCurrentUserSubscription();
         if (!userId) {
             return { success: false, error: "Please sign in to view your history." };
+        }
+
+        // Messages are still saved on every plan, so upgrading unlocks past conversations too
+        if (!limits.hasSessionHistory) {
+            return { success: false, error: HISTORY_UPGRADE_ERROR, requiresUpgrade: true };
         }
 
         await connectToDatabase();
@@ -203,11 +211,15 @@ export const getSessionHistory = async (): Promise<{ success: boolean; data?: Se
     }
 }
 
-export const getSessionById = async (sessionId: string): Promise<{ success: boolean; data?: SessionDetail; error?: string }> => {
+export const getSessionById = async (sessionId: string): Promise<HistoryResult<SessionDetail>> => {
     try {
-        const { userId } = await auth();
+        const { userId, limits } = await getCurrentUserSubscription();
         if (!userId) {
             return { success: false, error: "Please sign in to view your history." };
+        }
+
+        if (!limits.hasSessionHistory) {
+            return { success: false, error: HISTORY_UPGRADE_ERROR, requiresUpgrade: true };
         }
 
         if (!mongoose.isValidObjectId(sessionId)) {

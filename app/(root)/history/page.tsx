@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { Clock, MessageSquare } from "lucide-react";
+import { Clock, Lock, MessageSquare } from "lucide-react";
 import { getSessionHistory } from "@/lib/actions/session.actions";
 import { formatDuration } from "@/lib/utils";
 
@@ -29,7 +29,14 @@ const page = async () => {
                 <h1 className="page-title-xl">Conversation History</h1>
                 <p className="subtitle mt-3">Revisit what you talked about with your books.</p>
 
-                {!result.success ? (
+                {result.requiresUpgrade ? (
+                    <div className="history-empty mt-10">
+                        <Lock className="size-10 text-(--text-secondary)" />
+                        <p className="transcript-empty-text mt-3">History is a paid feature</p>
+                        <p className="transcript-empty-hint">Upgrade your plan to revisit every conversation you have with your books.</p>
+                        <Link href="/subscriptions" className="history-empty-cta">View plans</Link>
+                    </div>
+                ) : !result.success ? (
                     <div className="history-empty mt-10">
                         <p className="transcript-empty-text">Couldn&apos;t load your history</p>
                         <p className="transcript-empty-hint">{result.error}</p>
