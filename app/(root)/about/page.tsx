@@ -69,7 +69,7 @@ const TECH_STACK = [
 const TEAM = [
     {
         name: "Tanishak Singhal",
-        role: "Full-Stack Developer",
+        role: "Product Manager & AI Engineer",
         photo: "/assets/team/tanishak.jpg",
         bio: "Final-year Computer Science student from Delhi who believes “writing code is an art”. Builds full-stack products with React, Next.js and Node, usually with an LLM wired in somewhere.",
         highlights: ["Product Management Intern · Awign", "DS & ML Apprentice · IBM", "DSA Teaching Assistant · Apna College"],
