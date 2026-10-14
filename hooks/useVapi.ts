@@ -60,10 +60,10 @@ const getConfigurationError = (language: VapiLanguage) => {
     return null;
 };
 
-const getFirstMessage = (language: VapiLanguage, title: string) =>
+const getFirstMessage = (language: VapiLanguage, title: string, author: string) =>
     language === 'hinglish'
-        ? `नमस्ते! आपसे मिलकर अच्छा लगा। शुरू करने से पहले एक बात बताइए, क्या आपने ${title} पढ़ी है, या हम बिल्कुल शुरुआत से शुरू करें?`
-        : `Hey, good to meet you. Quick question before we dive in - have you actually read ${title} yet, or are we starting fresh?`;
+        ? `नमस्ते, मेरा नाम Lumora है, आपसे मिलकर अच्छा लगा। क्या आपने ${author} की ${title} पढ़ी है, या हम बिल्कुल शुरुआत से शुरू करें?`
+        : `Hey, my name is Lumora, good to meet you. Have you read ${title} by ${author} yet, or are we starting fresh?`;
 
 // Vapi reports API failures as objects (e.g. { message, error, statusCode }), not strings
 const getVapiErrorMessage = (error: unknown): string => {
@@ -326,7 +326,7 @@ export function useVapi(book: IBook, language: VapiLanguage = 'english') {
                 (result.maxDurationMinutes ?? limits.maxSessionMinutes) * SECONDS_PER_MINUTE,
             );
 
-            const firstMessage = getFirstMessage(language, book.title);
+            const firstMessage = getFirstMessage(language, book.title, book.author);
             const activeVoice = language === 'hinglish' ? getHinglishVoice(voice) : getVoice(voice);
 
             await getVapi(language).start(VAPI_CONFIGS[language].assistantId, {
