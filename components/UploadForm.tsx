@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Upload, ImageIcon } from 'lucide-react';
+import { Upload, ImageIcon, Lock, Globe } from 'lucide-react';
 import { UploadSchema } from '@/lib/zod';
 import { BookUploadFormValues } from '@/types';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -19,6 +19,11 @@ import {checkBookExists, createBook, saveBookSegments} from "@/lib/actions/book.
 import {useRouter} from "next/navigation";
 import {parsePDFFile} from "@/lib/utils";
 import {upload} from "@vercel/blob/client";
+
+const VISIBILITY_OPTIONS = [
+    { value: false, label: 'Private', description: 'Only you can see and talk to this book', Icon: Lock },
+    { value: true, label: 'Public', description: 'Everyone can find it in the Public Library', Icon: Globe },
+];
 
 const UploadForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,6 +41,7 @@ const UploadForm = () => {
             title: '',
             author: '',
             persona: DEFAULT_VOICE,
+            isPublic: false,
             pdfFile: undefined,
             coverImage: undefined,
         },
@@ -110,6 +116,7 @@ const UploadForm = () => {
                 title: data.title,
                 author: data.author,
                 persona: data.persona,
+                isPublic: data.isPublic,
                 fileURL: uploadedPdfBlob.url,
                 fileBlobKey: uploadedPdfBlob.pathname,
                 coverURL: coverUrl,
@@ -176,6 +183,7 @@ const UploadForm = () => {
                                     title: 'Title',
                                     author: 'Author name',
                                     persona: 'Assistant voice',
+                                    isPublic: 'Visibility',
                                     pdfFile: 'Book PDF file',
                                     coverImage: 'Cover image',
                                 };
@@ -271,7 +279,45 @@ const UploadForm = () => {
                             )}
                         />
 
-                        {/* 6. Submit Button */}
+                        {/* 6. Visibility */}
+                        <FormField
+                            control={form.control}
+                            name="isPublic"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="form-label">Who can see this book?</FormLabel>
+                                    <FormControl>
+                                        <div className="voice-selector-options" role="radiogroup" aria-label="Book visibility">
+                                            {VISIBILITY_OPTIONS.map(({ value, label, description, Icon }) => {
+                                                const isSelected = field.value === value;
+                                                return (
+                                                    <button
+                                                        key={label}
+                                                        type="button"
+                                                        role="radio"
+                                                        aria-checked={isSelected}
+                                                        disabled={isSubmitting}
+                                                        onClick={() => field.onChange(value)}
+                                                        className={`voice-selector-option ${isSelected ? 'voice-selector-option-selected' : 'voice-selector-option-default'} ${isSubmitting ? 'voice-selector-option-disabled' : ''}`}
+                                                    >
+                                                        <div className="flex flex-col gap-1 text-left">
+                                                            <span className="flex items-center gap-2 font-bold text-(--text-primary)">
+                                                                <Icon className="size-4" aria-hidden="true" />
+                                                                {label}
+                                                            </span>
+                                                            <span className="text-xs text-(--text-secondary) leading-relaxed">{description}</span>
+                                                        </div>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* 7. Submit Button */}
                         <Button type="submit" className="form-btn" disabled={isSubmitting}>
                             Begin Synthesis
                         </Button>

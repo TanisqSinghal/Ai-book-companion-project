@@ -566,6 +566,10 @@
   /* ===========================================
      BOOKS LIBRARY COMPONENT
      =========================================== */
+  /* Bleeds a little past the page width on large screens, never wider than the free space */
+  .hero3d-section {
+    margin-inline: calc(-1 * clamp(0px, (100vw - 1280px) / 2 - 16px, 96px));
+  }
   .hero3d-card {
     @apply relative overflow-hidden rounded-[20px] bg-[#060914] text-white grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:h-[560px];
     box-shadow: 0 30px 60px -24px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
@@ -599,8 +603,30 @@
     list-style: none;
   }
   .hero3d-step {
-    @apply flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/[0.06] px-3 py-2 text-left;
+    @apply relative overflow-hidden flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/[0.06] px-3 py-2 text-left transition-all duration-500 ease-out;
   }
+  .hero3d-step-hidden {
+    @apply opacity-0 translate-y-3 blur-[2px];
+  }
+  .hero3d-step-visible {
+    @apply opacity-100 translate-y-0 blur-none;
+  }
+  .hero3d-step-active {
+    @apply border-[#5ee7ff]/60;
+    box-shadow: 0 0 22px rgba(94, 231, 255, 0.25), inset 0 0 12px rgba(94, 231, 255, 0.08);
+  }
+  /* A light sweep glides across each card every few seconds */
+  .hero3d-step-visible::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.12) 50%, transparent 70%);
+    transform: translateX(-120%);
+    animation: hero3d-sweep 7s ease-in-out 1.5s infinite;
+  }
+  .hero3d-step:nth-child(2)::after { animation-delay: 2.1s; }
+  .hero3d-step:nth-child(3)::after { animation-delay: 2.7s; }
   .hero3d-step-number {
     @apply size-7 min-w-7 rounded-full border border-[#5ee7ff]/50 text-[#5ee7ff] flex items-center justify-center font-semibold text-sm;
   }
@@ -627,6 +653,239 @@
   }
   .hero3d-caption-user {
     @apply border-[#ffb454]/50;
+  }
+
+  /* Shiny gradient text that shimmers left to right */
+  .hero3d-shine {
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(110deg, #ffffff 0%, #ffffff 40%, #5ee7ff 50%, #ffffff 60%, #ffffff 100%);
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: hero3d-shimmer 4s linear infinite;
+  }
+  .type-caret {
+    @apply inline-block w-[2px] h-[1em] ml-0.5 align-[-0.12em] bg-[#5ee7ff];
+    box-shadow: 0 0 8px #5ee7ff;
+    animation: type-caret-blink 1s steps(1) infinite;
+  }
+
+  /* Floating HUD card that introduces the robot */
+  .hero3d-agent-intro {
+    @apply absolute top-3 left-3 sm:top-8 sm:left-[6%] z-10 w-[230px] sm:w-[300px] rounded-2xl border border-[#5ee7ff]/30 bg-[#060914]/60 px-3 py-2.5 sm:px-4 sm:py-3 backdrop-blur-md pointer-events-none;
+    box-shadow: 0 0 30px rgba(94, 231, 255, 0.12);
+    animation: hero3d-float 6s ease-in-out infinite;
+  }
+  .hero3d-agent-label {
+    @apply flex items-center gap-2 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.18em] text-[#5ee7ff]/80;
+  }
+  .hero3d-agent-dot {
+    @apply size-1.5 rounded-full bg-[#6fd6a0];
+    box-shadow: 0 0 8px #6fd6a0;
+    animation: hero3d-pulse 1.6s ease-in-out infinite;
+  }
+  .hero3d-agent-name {
+    @apply mt-1 font-serif text-2xl sm:text-3xl font-bold leading-tight;
+  }
+  .hero3d-agent-name.hero3d-shine {
+    background-image: linear-gradient(110deg, #ffffff 0%, #a5b4ff 35%, #5ee7ff 50%, #c4a8ff 65%, #ffffff 100%);
+  }
+  .hero3d-agent-tagline {
+    @apply mt-1 min-h-10 text-xs sm:text-sm leading-5 text-white/80;
+  }
+
+  /* Wide screens: the 3D scene shifts right (same size, so the camera keeps its framing)
+     and the Lumora card sits beside the robot in the space that opens up */
+  @media (min-width: 1440px) {
+    .hero3d-card {
+      grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+    }
+    .hero3d-scene .stage-canvas {
+      left: 120px;
+      right: -120px;
+    }
+    /* Hide the canvas's shifted left edge under the fade */
+    .hero3d-scene-fade {
+      background:
+        linear-gradient(90deg, #060914 0, #060914 120px, transparent calc(120px + 16%)),
+        radial-gradient(ellipse at center, transparent 60%, rgba(3, 5, 12, 0.7) 100%);
+    }
+    .hero3d-agent-intro {
+      top: 50%;
+      left: 12px;
+      width: 230px;
+      translate: 0 -50%;
+    }
+    .hero3d-agent-tagline {
+      min-height: 3.75rem;
+    }
+  }
+  /* ===========================================
+     ABOUT PAGE
+     =========================================== */
+  .about-page {
+    @apply flex flex-col gap-20 md:gap-28;
+  }
+  .about-hero {
+    @apply relative grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] items-center gap-10 pt-6 md:pt-12;
+  }
+  .about-hero-copy {
+    @apply flex flex-col items-center gap-5 text-center lg:items-start lg:text-left;
+  }
+  .about-eyebrow {
+    @apply flex items-center gap-2 rounded-full border border-[#5ee7ff]/30 bg-[#5ee7ff]/[0.06] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#5ee7ff]/90;
+  }
+  .about-title {
+    @apply font-serif text-5xl md:text-7xl font-bold leading-[1.05] tracking-[-0.02em];
+  }
+  .about-title-accent {
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(110deg, #ffcb7d 0%, #ffb454 35%, #ff7aa2 70%, #c4a8ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  .about-lead {
+    @apply max-w-2xl text-base md:text-lg leading-7 text-[var(--text-secondary)];
+  }
+  .about-actions {
+    @apply mt-2 flex w-full flex-col gap-3 sm:w-auto sm:flex-row;
+  }
+  .about-btn-ghost {
+    @apply inline-flex items-center justify-center rounded-[12px] border border-white/15 bg-white/[0.04] px-6 py-2.5 font-semibold text-[var(--text-primary)] transition-colors hover:bg-white/[0.1];
+  }
+  .about-mascot {
+    @apply relative mx-auto flex size-64 items-center justify-center md:size-80;
+  }
+  /* Thin glowing orbit rings drawn with a masked conic gradient */
+  .about-mascot-ring {
+    @apply absolute inset-0 rounded-full;
+    background: conic-gradient(from 0deg, transparent, rgba(94, 231, 255, 0.8), transparent 30%, rgba(196, 168, 255, 0.8), transparent 60%, rgba(255, 180, 84, 0.7), transparent);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
+    animation: about-spin 9s linear infinite;
+  }
+  .about-mascot-ring-inner {
+    inset: 14%;
+    opacity: 0.7;
+    animation-duration: 6s;
+    animation-direction: reverse;
+  }
+  .about-mascot-image {
+    @apply relative h-auto w-[58%];
+    filter: drop-shadow(0 0 30px rgba(94, 231, 255, 0.35));
+    animation: hero3d-float 6s ease-in-out infinite;
+  }
+  .about-section {
+    @apply flex flex-col items-center gap-8;
+  }
+  .about-section-title {
+    @apply text-center font-serif text-3xl font-bold md:text-4xl;
+  }
+  .about-features {
+    @apply grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3;
+    list-style: none;
+  }
+  .about-feature {
+    @apply relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#5ee7ff]/40;
+    backdrop-filter: blur(8px);
+
+    &:hover {
+      box-shadow: 0 0 30px rgba(94, 231, 255, 0.15);
+    }
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.08) 50%, transparent 70%);
+      transform: translateX(-120%);
+      animation: hero3d-sweep 8s ease-in-out infinite;
+    }
+  }
+  .about-feature-icon {
+    @apply mb-4 inline-flex size-10 items-center justify-center rounded-xl border border-[#5ee7ff]/40 bg-[#5ee7ff]/10 text-[#5ee7ff];
+    box-shadow: 0 0 16px rgba(94, 231, 255, 0.25);
+  }
+  .about-feature-title {
+    @apply text-lg font-semibold text-white;
+  }
+  .about-feature-description {
+    @apply mt-2 text-sm leading-6 text-[var(--text-secondary)];
+  }
+  .about-stack {
+    @apply flex max-w-3xl flex-wrap justify-center gap-3;
+    list-style: none;
+  }
+  .about-stack-chip {
+    @apply rounded-full border border-white/[0.12] bg-white/[0.05] px-4 py-2 text-sm font-medium text-white/85 transition-colors hover:border-[#ffb454]/50 hover:text-white;
+  }
+  .about-team {
+    @apply grid w-full max-w-5xl grid-cols-1 gap-6 md:grid-cols-2;
+  }
+  .about-member {
+    @apply relative flex flex-col items-center rounded-[24px] border border-white/10 bg-gradient-to-b from-white/[0.07] to-white/[0.02] px-6 py-10 text-center transition-all duration-300 hover:-translate-y-1;
+
+    &:hover {
+      border-color: rgba(196, 168, 255, 0.35);
+      box-shadow: 0 0 40px rgba(196, 168, 255, 0.18);
+    }
+  }
+  .about-member-photo-wrap {
+    @apply relative mb-6 size-40 p-1.5;
+  }
+  .about-member-ring {
+    @apply absolute inset-0 rounded-full;
+    background: conic-gradient(from 0deg, #5ee7ff, #c4a8ff, #ff7aa2, #ffb454, #5ee7ff);
+    box-shadow: 0 0 30px rgba(94, 231, 255, 0.35);
+    animation: about-spin 6s linear infinite;
+  }
+  .about-member-photo {
+    @apply relative size-full rounded-full border-4 border-[#060914] object-cover;
+  }
+  .about-member-name {
+    @apply font-serif text-2xl font-bold;
+  }
+  .about-member-role {
+    @apply mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-[#5ee7ff]/85;
+  }
+  .about-member-bio {
+    @apply mt-4 max-w-md text-sm leading-6 text-[var(--text-secondary)];
+  }
+  .about-member-highlights {
+    @apply mt-5 flex flex-wrap justify-center gap-2;
+    list-style: none;
+
+    & li {
+      @apply rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs text-white/75;
+    }
+  }
+  .about-member-links {
+    @apply mt-7 flex items-center gap-3;
+  }
+  .about-member-portfolio {
+    @apply inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-bold text-[#1a0f02] transition-all;
+    background: linear-gradient(135deg, #ffcb7d 0%, #ffb454 100%);
+    box-shadow: 0 8px 24px rgba(255, 180, 84, 0.3);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(255, 180, 84, 0.45);
+    }
+  }
+  .about-member-icon {
+    @apply inline-flex size-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.05] text-white/80 transition-colors hover:border-[#5ee7ff]/60 hover:text-[#5ee7ff];
+  }
+  .about-love {
+    @apply flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pb-6 font-serif text-2xl font-bold md:text-4xl;
+  }
+  .about-heart {
+    @apply inline-block size-16 align-middle md:size-20;
+    filter: drop-shadow(0 0 18px rgba(255, 45, 85, 0.55));
+  }
+  .about-heart-fallback {
+    @apply flex size-full items-center justify-center text-4xl text-[#ff2d55];
   }
   .library-cta-secondary {
     @apply inline-flex items-center gap-2 bg-white text-[var(--text-primary)] px-5 py-3 rounded-[10px] font-bold text-xl transition-all;
@@ -838,6 +1097,19 @@
   }
   .shelf-empty {
     @apply rounded-[20px] border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-6 py-14 text-center text-[var(--text-secondary)];
+  }
+  .shelf-tabs {
+    @apply inline-flex w-fit gap-1 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-1;
+  }
+  .shelf-tab {
+    @apply inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)];
+  }
+  .shelf-tab-active {
+    @apply bg-[var(--accent-warm)] text-[#1a0f02] hover:text-[#1a0f02];
+    box-shadow: 0 6px 18px rgba(255, 180, 84, 0.25);
+  }
+  .shelf-private-badge {
+    @apply ml-2 inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.08] px-2 py-0.5 align-middle font-sans text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)];
   }
   /* Fades the whole screen to the stage colour while the camera flies into a book */
   .shelf-flyout {
@@ -1246,8 +1518,40 @@ button[data-variant='unstyled'] *,
   100% { transform: rotate(18deg) translateX(120vw); opacity: 0; }
 }
 
+@keyframes hero3d-shimmer {
+  from { background-position: 150% 0; }
+  to { background-position: -50% 0; }
+}
+@keyframes hero3d-sweep {
+  0%, 70% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+@keyframes hero3d-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes hero3d-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+@keyframes type-caret-blink {
+  50% { opacity: 0; }
+}
+@keyframes about-spin {
+  to { transform: rotate(360deg); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .cosmic-bg * {
+  .cosmic-bg *,
+  .hero3d-shine,
+  .hero3d-step::after,
+  .hero3d-agent-intro,
+  .hero3d-agent-dot,
+  .type-caret,
+  .about-mascot-ring,
+  .about-mascot-image,
+  .about-feature::after,
+  .about-member-ring {
     animation: none !important;
   }
 }

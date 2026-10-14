@@ -20,6 +20,7 @@ export interface ShelfBook {
     coverURL: string;
     fileURL: string;
     slug: string;
+    isPublic?: boolean;
 }
 
 export interface ShelfSlot {

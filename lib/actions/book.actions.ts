@@ -9,22 +9,44 @@ import mongoose from "mongoose";
 import { revalidatePath } from "next/cache";
 import { getCurrentUserSubscription } from "@/lib/subscription.server";
 import { auth } from "@clerk/nextjs/server";
+import { randomBytes } from "crypto";
+
+export type BookShelf = 'public' | 'mine';
+
+// Books saved before visibility existed have no isPublic value and stay public
+const PUBLIC_FILTER = { isPublic: { $ne: false } };
+
+// A user's own copy of a title: the plain slug, or the suffixed one used when another user had it first
+const ownSlugFilter = (clerkId: string, title: string) => ({
+    clerkId,
+    slug: { $regex: `^${escapeRegex(generateSlug(title))}(-[a-f0-9]{6})?$` },
+});
 
 
-export const getAllBooks = async (query?: string) => {
+export const getAllBooks = async (query?: string, shelf: BookShelf = 'public') => {
     try {
         await connectToDatabase();
+
+        let shelfFilter: Record<string, unknown> = PUBLIC_FILTER;
+        if (shelf === 'mine') {
+            const { userId } = await auth();
+            if (!userId) {
+                return { success: true, data: [] };
+            }
+            shelfFilter = { clerkId: userId };
+        }
 
         const trimmedQuery = query?.trim();
 
         const filter = trimmedQuery
             ? {
+                ...shelfFilter,
                 $or: [
                     { title: { $regex: escapeRegex(trimmedQuery), $options: 'i' } },
                     { author: { $regex: escapeRegex(trimmedQuery), $options: 'i' } },
                 ],
             }
-            : {};
+            : shelfFilter;
 
         const books = await Book.find(filter).sort({ createdAt: -1 }).lean();
 
@@ -42,13 +64,17 @@ export const getAllBooks = async (query?: string) => {
 }
 
 
+// Only the current user's own books count: other users may upload the same title
 export const checkBookExists = async (title: string) => {
     try {
+        const { userId } = await auth();
+        if (!userId) {
+            return { exists: false };
+        }
+
         await connectToDatabase();
 
-        const slug = generateSlug(title);
-
-        const existingBook = await Book.findOne({slug}).lean();
+        const existingBook = await Book.findOne(ownSlugFilter(userId, title)).lean();
 
         if(existingBook) {
             return {
@@ -82,9 +108,7 @@ export const createBook = async (data: CreateBook): Promise<CreateBookResult> =>
             }
         }
 
-        const slug = generateSlug(data.title);
-
-        const existingBook = await Book.findOne({slug}).lean();
+        const existingBook = await Book.findOne(ownSlugFilter(userId, data.title)).lean();
 
         if(existingBook) {
             return {
@@ -104,8 +128,13 @@ export const createBook = async (data: CreateBook): Promise<CreateBookResult> =>
             }
         }
 
+        // Slugs are unique site-wide, so a title another user already has gets a short suffix
+        const baseSlug = generateSlug(data.title);
+        const slug = (await Book.exists({ slug: baseSlug })) ? `${baseSlug}-${randomBytes(3).toString('hex')}` : baseSlug;
+
         const book = await Book.create({
             ...data,
+            isPublic: Boolean(data.isPublic),
             clerkId: userId,
             slug,
             totalSegments: 0,
@@ -177,6 +206,18 @@ export const getBookBySlug = async (slug: string) => {
             return {
                 success: false,
                 error: 'Book not found',
+            }
+        }
+
+        // Private books are only visible to the user who uploaded them
+        const { clerkId, isPublic } = book as { clerkId?: string; isPublic?: boolean };
+        if (isPublic === false) {
+            const { userId } = await auth();
+            if (userId !== clerkId) {
+                return {
+                    success: false,
+                    error: 'Book not found',
+                }
             }
         }
 

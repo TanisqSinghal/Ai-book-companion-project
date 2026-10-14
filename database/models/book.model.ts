@@ -8,6 +8,8 @@ const BookSchema = new Schema<IBook>({
     slug: {type: String, required: true, unique: true, lowercase: true, trim: true},
     author: {type: String, required: true},
     persona: {type: String},
+    // Books saved before visibility existed have no value and count as public
+    isPublic: {type: Boolean},
     fileURL: {type: String, required: true},
     fileBlobKey: {type: String, required: true},
     coverURL: {type: String},

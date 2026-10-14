@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import type { CallStatus } from '@/hooks/useVapi';
 import { detectMood } from '@/lib/mood';
+import AgentIntro from '@/components/stage/AgentIntro';
 
 // WebGL only exists in the browser, so the 3D stage is never server-rendered
 const ConversationStage = dynamic(() => import('@/components/stage/ConversationStage'), {
@@ -60,8 +61,8 @@ const HeroStage = () => {
     }, []);
 
     return (
-        <div className="hero3d-scene" aria-hidden="true">
-            <div className="stage-canvas">
+        <div className="hero3d-scene">
+            <div className="stage-canvas" aria-hidden="true">
                 <ConversationStage
                     status={beat.status}
                     aiLevel={aiLevel}
@@ -72,8 +73,9 @@ const HeroStage = () => {
                     userMood={mood}
                 />
             </div>
-            <div className="hero3d-scene-fade" />
-            <p className={`hero3d-caption ${beat.speaker === 'ai' ? 'hero3d-caption-ai' : 'hero3d-caption-user'}`}>
+            <div className="hero3d-scene-fade" aria-hidden="true" />
+            <AgentIntro />
+            <p aria-hidden="true" className={`hero3d-caption ${beat.speaker === 'ai' ? 'hero3d-caption-ai' : 'hero3d-caption-user'}`}>
                 {beat.caption}
             </p>
         </div>

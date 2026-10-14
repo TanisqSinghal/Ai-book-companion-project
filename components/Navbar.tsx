@@ -10,6 +10,7 @@ const navItems = [
   { label: "Add New", href: "/books/new" },
   { label: "History", href: "/history" },
   { label: "Pricing", href: "/subscriptions" },
+  { label: "About", href: "/about" },
 ];
 
 const Navbar = () => {

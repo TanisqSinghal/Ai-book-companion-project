@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { BookOpen, Mic } from 'lucide-react';
+import { BookOpen, Lock, Mic } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { BOOK_HEIGHT } from '@/components/stage/bookSize';
@@ -104,7 +104,15 @@ const Bookshelf = ({ books }: { books: ShelfBook[] }) => {
 
             <div className="shelf-panel">
                 <div className="min-w-0">
-                    <p className="shelf-panel-title">{selected.title}</p>
+                    <p className="shelf-panel-title">
+                        {selected.title}
+                        {selected.isPublic === false && (
+                            <span className="shelf-private-badge">
+                                <Lock className="size-3" aria-hidden="true" />
+                                Private
+                            </span>
+                        )}
+                    </p>
                     <p className="shelf-panel-author">by {selected.author}</p>
                 </div>
                 <div className="shelf-panel-actions">
