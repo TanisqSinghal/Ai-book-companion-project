@@ -318,6 +318,47 @@
   .logo-text {
     @apply font-semibold text-xl block text-[var(--text-primary)];
   }
+  /* ===========================================
+     FOOTER
+     Phones: stacked, links in two columns. Tablet up: brand left, links right.
+     =========================================== */
+  .site-footer {
+    @apply relative z-10 border-t border-[var(--border-subtle)] bg-[var(--bg-primary)]/85 backdrop-blur-md;
+  }
+  .site-footer-inner {
+    @apply flex flex-col md:flex-row md:justify-between gap-10 py-10 md:py-12;
+  }
+  .site-footer-brand {
+    @apply flex flex-col gap-3 md:max-w-sm;
+  }
+  .site-footer-tagline {
+    @apply text-sm leading-6 text-[var(--text-secondary)];
+  }
+  .site-footer-columns {
+    @apply grid grid-cols-2 gap-8 sm:gap-16;
+  }
+  .site-footer-heading {
+    @apply mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)];
+  }
+  .site-footer-links {
+    @apply flex flex-col gap-2.5;
+  }
+  .site-footer-link {
+    @apply text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)];
+
+    &:focus-visible {
+      @apply rounded-sm text-[var(--text-primary)];
+      outline: 2px solid var(--accent-warm);
+      outline-offset: 2px;
+    }
+  }
+  .site-footer-bottom {
+    @apply flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-[var(--border-subtle)] py-5 text-xs text-[var(--text-muted)] text-center;
+
+    & .site-footer-link {
+      @apply text-xs;
+    }
+  }
   .nav-link-base {
     @apply text-base font-medium leading-6 transition-all;
   }

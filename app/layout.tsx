@@ -3,6 +3,7 @@ import { IBM_Plex_Serif, Mona_Sans} from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import CosmicBackground from "@/components/CosmicBackground";
 import "./globals.css";
 import {Toaster} from "@/components/ui/sonner";
@@ -55,6 +56,7 @@ export default function RootLayout({
             <CosmicBackground />
             <Navbar />
             {children}
+            <Footer />
             <Toaster />
           </body>
         </html>
