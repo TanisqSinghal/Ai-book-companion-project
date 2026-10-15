@@ -613,11 +613,12 @@
     }
   }
   .hero3d-steps {
-    @apply mt-4 flex flex-wrap justify-center lg:justify-start gap-2.5;
+    @apply mt-5 flex flex-wrap justify-center lg:justify-start gap-x-6 gap-y-3;
     list-style: none;
   }
+  /* Plain info items, not cards: no border or fill so they don't read as buttons */
   .hero3d-step {
-    @apply relative overflow-hidden flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/[0.06] px-3 py-2 text-left transition-all duration-500 ease-out;
+    @apply relative flex items-center gap-2.5 py-1 text-left transition-all duration-500 ease-out cursor-default;
   }
   .hero3d-step-hidden {
     @apply opacity-0 translate-y-3 blur-[2px];
@@ -625,24 +626,26 @@
   .hero3d-step-visible {
     @apply opacity-100 translate-y-0 blur-none;
   }
-  .hero3d-step-active {
-    @apply border-[#5ee7ff]/60;
+  /* The step being typed glows on its number instead of a card border */
+  .hero3d-step-active .hero3d-step-number {
+    @apply border-[#5ee7ff];
     box-shadow: 0 0 22px rgba(94, 231, 255, 0.25), inset 0 0 12px rgba(94, 231, 255, 0.08);
   }
-  /* A light sweep glides across each card every few seconds */
+  /* A light sweep glides across each step every few seconds. The band moves via
+     background-position so the edge mask stays put and no box outline shows. */
   .hero3d-step-visible::after {
     content: '';
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.12) 50%, transparent 70%);
-    transform: translateX(-120%);
-    animation: hero3d-sweep 7s ease-in-out 1.5s infinite;
+    background: linear-gradient(105deg, transparent 43.3%, rgba(255, 255, 255, 0.12) 50%, transparent 56.7%) 100% 0 / 300% 100% no-repeat;
+    mask-image: radial-gradient(closest-side, #000 55%, transparent);
+    animation: hero3d-step-sweep 7s ease-in-out 1.5s infinite;
   }
   .hero3d-step:nth-child(2)::after { animation-delay: 2.1s; }
   .hero3d-step:nth-child(3)::after { animation-delay: 2.7s; }
   .hero3d-step-number {
-    @apply size-7 min-w-7 rounded-full border border-[#5ee7ff]/50 text-[#5ee7ff] flex items-center justify-center font-semibold text-sm;
+    @apply size-7 min-w-7 rounded-full border border-[#5ee7ff]/50 text-[#5ee7ff] flex items-center justify-center font-semibold text-sm transition-all duration-500;
   }
   .hero3d-step-title {
     @apply font-semibold text-sm leading-5 text-white;
@@ -1540,6 +1543,10 @@ button[data-variant='unstyled'] *,
 @keyframes hero3d-sweep {
   0%, 70% { transform: translateX(-120%); }
   100% { transform: translateX(120%); }
+}
+@keyframes hero3d-step-sweep {
+  0%, 70% { background-position: 100% 0; }
+  100% { background-position: 0% 0; }
 }
 @keyframes hero3d-float {
   0%, 100% { transform: translateY(0); }
