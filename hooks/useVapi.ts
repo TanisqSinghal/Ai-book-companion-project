@@ -5,7 +5,7 @@ import Vapi from '@vapi-ai/web';
 import { useAuth } from '@clerk/nextjs';
 
 import { ASSISTANT_ID, DEFAULT_VOICE, HINGLISH_ASSISTANT_ID, VOICE_SETTINGS } from '@/lib/constants';
-import { getHinglishVoice, getVoice } from '@/lib/utils';
+import { getHinglishVoice, getVoice, getVoiceGender } from '@/lib/utils';
 import { IBook, Messages } from '@/types';
 import { startVoiceSession, endVoiceSession, saveSessionMessage } from '@/lib/actions/session.actions';
 import { useSubscriptionPlan } from '@/hooks/useSubscriptionPlan';
@@ -354,6 +354,8 @@ export function useVapi(book: IBook, language: VapiLanguage = 'english') {
                     title: book.title,
                     author: book.author,
                     bookId: book._id,
+                    // Lets the system prompt pick male or female Hindi verb forms for the voice speaking
+                    assistantGender: getVoiceGender(activeVoice.id),
                 },
                 // English keeps the low-latency turbo model; Hinglish uses multilingual v2 for proper Hindi pronunciation
                 voice: {
