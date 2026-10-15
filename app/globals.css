@@ -71,6 +71,7 @@
   /* Semantic Colors */
   --success: #6fd6a0;
   --warning: #ffb454;
+  --danger: #ff7a7a;
 
   /* Borders */
   --border-subtle: rgba(255, 255, 255, 0.1);
@@ -1046,8 +1047,9 @@
   /* ===========================================
      VOICE SELECTOR COMPONENT
      =========================================== */
+  /* Two per row on phones; four voices in one row would push the page sideways */
   .voice-selector-options {
-    @apply flex gap-4;
+    @apply grid grid-cols-2 sm:flex gap-4;
   }
   .voice-selector-option {
     @apply flex-1 flex items-center justify-center gap-3 p-4 border border-[var(--border-subtle)] rounded-lg cursor-pointer transition-all;
@@ -1098,7 +1100,8 @@
     @apply text-[var(--accent-warm)];
   }
   .shelf-panel {
-    @apply sticky bottom-4 z-20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-[var(--border-medium)] bg-[#0f1730]/85 px-4 py-3 sm:px-5 backdrop-blur-md;
+    /* Phones: a grid so the owner buttons can share the title row; wider screens: one row */
+    @apply sticky bottom-4 z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center sm:flex sm:flex-row justify-between gap-3 rounded-2xl border border-[var(--border-medium)] bg-[#0f1730]/85 px-4 py-3 sm:px-5 backdrop-blur-md;
     box-shadow: var(--shadow-soft-lg);
   }
   .shelf-panel-title {
@@ -1108,7 +1111,10 @@
     @apply text-sm text-[var(--text-secondary)] line-clamp-1;
   }
   .shelf-panel-actions {
-    @apply flex shrink-0 gap-2.5;
+    @apply col-span-2 flex shrink-0 gap-2.5;
+  }
+  .shelf-panel-owner {
+    @apply row-start-1 col-start-2 flex shrink-0 gap-2;
   }
   .shelf-btn-primary,
   .shelf-btn-secondary {
@@ -1153,6 +1159,75 @@
   /* Fades the whole screen to the stage colour while the camera flies into a book */
   .shelf-flyout {
     @apply fixed inset-0 z-[100] bg-[#060914] animate-in fade-in duration-700;
+  }
+  /* Square edit/delete buttons next to the main shelf actions */
+  .shelf-btn-icon {
+    @apply flex-none size-10 px-0;
+  }
+  .shelf-btn-danger:hover {
+    @apply border-[var(--danger)]/60 text-[var(--danger)];
+  }
+
+  /* ===========================================
+     EDIT / DELETE BOOK
+     =========================================== */
+  .btn-danger {
+    @apply inline-flex shrink-0 whitespace-nowrap min-h-10 items-center justify-center gap-2 rounded-[10px] border border-[var(--danger)]/50 bg-[var(--danger)]/10 px-4 py-2 text-sm font-semibold text-[var(--danger)] cursor-pointer transition-colors;
+
+    &:hover:not(:disabled) {
+      @apply bg-[var(--danger)]/20;
+    }
+    &:disabled {
+      @apply opacity-60 cursor-not-allowed;
+    }
+    &:focus-visible {
+      outline: 2px solid var(--danger);
+      outline-offset: 2px;
+    }
+  }
+  .dialog-overlay {
+    @apply fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm animate-in fade-in duration-200;
+  }
+  .dialog-content {
+    @apply fixed left-1/2 top-1/2 z-[111] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-[var(--border-medium)] bg-[var(--bg-secondary)] p-6 animate-in fade-in zoom-in-95 duration-200;
+    box-shadow: var(--shadow-soft-lg);
+  }
+  .dialog-title {
+    @apply font-serif text-xl font-bold text-[var(--text-primary)];
+  }
+  .dialog-description {
+    @apply mt-2 text-sm leading-6 text-[var(--text-secondary)];
+  }
+  .dialog-actions {
+    @apply mt-6 flex justify-end gap-2.5;
+  }
+  .edit-cover-row {
+    @apply flex items-end gap-5;
+  }
+  .edit-cover-preview {
+    @apply flex shrink-0 flex-col items-center gap-2;
+  }
+  .edit-cover-image {
+    @apply h-36 w-24 rounded-md border border-[var(--border-subtle)] object-cover;
+  }
+  .edit-cover-caption {
+    @apply text-xs text-[var(--text-secondary)];
+  }
+  .edit-actions {
+    @apply grid grid-cols-[auto_1fr] gap-3;
+
+    & .shelf-btn-secondary {
+      @apply h-14 px-6 text-base;
+    }
+  }
+  .danger-zone {
+    @apply flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-[var(--danger)]/30 p-5;
+  }
+  .danger-zone-title {
+    @apply font-semibold text-[var(--text-primary)];
+  }
+  .danger-zone-text {
+    @apply mt-1 text-sm text-[var(--text-secondary)];
   }
 
   /* ===========================================

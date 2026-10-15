@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 import { Control, FieldPath, FieldValues } from 'react-hook-form';
 import { LucideIcon } from 'lucide-react';
 import z from 'zod';
-import { UploadSchema } from '@/lib/zod';
+import { EditBookSchema, UploadSchema } from '@/lib/zod';
 import { PlanType } from '@/lib/subscriptions-constants';
 
 // ============================================
@@ -65,6 +65,23 @@ export interface IVoiceSession extends Document {
 // ============================================
 
 export type BookUploadFormValues = z.infer<typeof UploadSchema>;
+export type BookEditFormValues = z.infer<typeof EditBookSchema>;
+
+export interface UpdateBookInput {
+    title: string;
+    author: string;
+    persona: string;
+    isPublic: boolean;
+    // Set only when the user picked a new cover; it is already uploaded to blob storage
+    coverURL?: string;
+}
+
+export interface BookMutationResult {
+    success: boolean;
+    // The book's slug after the change; it follows the title
+    slug?: string;
+    error?: string;
+}
 
 export interface CreateBook {
     clerkId: string;

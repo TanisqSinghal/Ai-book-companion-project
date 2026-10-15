@@ -75,6 +75,7 @@ const page = async ({ searchParams }: HomePageProps) => {
             fileURL: book.fileURL,
             slug: book.slug,
             isPublic: book.isPublic !== false,
+            isOwner: Boolean(userId) && book.clerkId === userId,
           }))}
         />
       )}

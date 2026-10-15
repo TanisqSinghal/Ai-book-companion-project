@@ -21,6 +21,8 @@ export interface ShelfBook {
     fileURL: string;
     slug: string;
     isPublic?: boolean;
+    // The signed-in user uploaded it, so they can edit or delete it
+    isOwner?: boolean;
 }
 
 export interface ShelfSlot {

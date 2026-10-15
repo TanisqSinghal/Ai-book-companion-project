@@ -1,14 +1,16 @@
 'use server'
 
 import { connectToDatabase } from "@/database/mongoose";
-import { CreateBook, CreateBookResult, TextSegment } from "@/types";
+import { BookMutationResult, CreateBook, CreateBookResult, TextSegment, UpdateBookInput } from "@/types";
 import { escapeRegex, generateSlug, serializeData } from "@/lib/utils";
+import { BookDetailsSchema } from "@/lib/zod";
 import Book from "@/database/models/book.model";
 import BookSegment from "@/database/models/book-segment.model";
 import mongoose from "mongoose";
 import { revalidatePath } from "next/cache";
 import { getCurrentUserSubscription } from "@/lib/subscription.server";
 import { auth } from "@clerk/nextjs/server";
+import { del } from "@vercel/blob";
 import { randomBytes } from "crypto";
 
 export type BookShelf = 'public' | 'mine';
@@ -21,6 +23,45 @@ const ownSlugFilter = (clerkId: string, title: string) => ({
     clerkId,
     slug: { $regex: `^${escapeRegex(generateSlug(title))}(-[a-f0-9]{6})?$` },
 });
+
+// Slugs are unique site-wide, so a title another book already has gets a short suffix
+const availableSlug = async (title: string, excludeId?: unknown) => {
+    const baseSlug = generateSlug(title);
+    const taken = await Book.exists(excludeId ? { slug: baseSlug, _id: { $ne: excludeId } } : { slug: baseSlug });
+    return taken ? `${baseSlug}-${randomBytes(3).toString('hex')}` : baseSlug;
+};
+
+const isBlobUrl = (url?: string) => {
+    if (!url) return false;
+    try {
+        return new URL(url).hostname.endsWith('.public.blob.vercel-storage.com');
+    } catch {
+        return false;
+    }
+};
+
+// Removing the stored files is best effort: the book itself is already gone or updated
+const deleteBlobs = async (urls: (string | undefined)[]) => {
+    const blobUrls = urls.filter((url): url is string => isBlobUrl(url));
+    if (blobUrls.length === 0) return;
+
+    try {
+        await del(blobUrls, { token: process.env.VERCEL_BLOB_READ_WRITE_TOKEN });
+    } catch (e) {
+        console.error("Error deleting book files from blob storage:", e);
+    }
+};
+
+// Loads a book only if the signed-in user uploaded it
+const findOwnBook = async (bookId: string) => {
+    const { userId } = await auth();
+    if (!userId) return { userId: null, book: null };
+    if (!mongoose.isValidObjectId(bookId)) return { userId, book: null };
+
+    await connectToDatabase();
+    const book = await Book.findOne({ _id: bookId, clerkId: userId });
+    return { userId, book };
+};
 
 
 export const getAllBooks = async (query?: string, shelf: BookShelf = 'public') => {
@@ -128,9 +169,7 @@ export const createBook = async (data: CreateBook): Promise<CreateBookResult> =>
             }
         }
 
-        // Slugs are unique site-wide, so a title another user already has gets a short suffix
-        const baseSlug = generateSlug(data.title);
-        const slug = (await Book.exists({ slug: baseSlug })) ? `${baseSlug}-${randomBytes(3).toString('hex')}` : baseSlug;
+        const slug = await availableSlug(data.title);
 
         const book = await Book.create({
             ...data,
@@ -193,6 +232,85 @@ export const saveBookSegments = async (bookId: string, clerkId: string, segments
             success : false,
             error: e,
         }
+    }
+}
+
+export const updateBook = async (bookId: string, input: UpdateBookInput): Promise<BookMutationResult> => {
+    try {
+        const parsed = BookDetailsSchema.safeParse(input);
+        if (!parsed.success) {
+            return { success: false, error: parsed.error.issues[0]?.message ?? 'Please check the book details.' };
+        }
+        if (input.coverURL !== undefined && !isBlobUrl(input.coverURL)) {
+            return { success: false, error: 'Invalid cover image.' };
+        }
+
+        const { userId, book } = await findOwnBook(bookId);
+        if (!userId) {
+            return { success: false, error: 'Please sign in to edit books.' };
+        }
+        if (!book) {
+            return { success: false, error: 'Book not found.' };
+        }
+
+        const { title, author, persona, isPublic } = parsed.data;
+        const previousSlug: string = book.slug;
+        const previousCover: string | undefined = book.coverURL;
+
+        // Duplicate checks and the book's URL both follow the title, so a new title needs a new slug
+        if (generateSlug(title) !== generateSlug(book.title)) {
+            const duplicate = await Book.exists({ ...ownSlugFilter(userId, title), _id: { $ne: book._id } });
+            if (duplicate) {
+                return { success: false, error: 'You already have a book with this title.' };
+            }
+            book.slug = await availableSlug(title, book._id);
+        }
+
+        book.title = title;
+        book.author = author;
+        book.persona = persona;
+        book.isPublic = isPublic;
+        if (input.coverURL) {
+            book.coverURL = input.coverURL;
+        }
+        await book.save();
+
+        if (input.coverURL && previousCover !== input.coverURL) {
+            await deleteBlobs([previousCover]);
+        }
+
+        revalidatePath('/');
+        revalidatePath(`/books/${previousSlug}`);
+
+        return { success: true, slug: book.slug };
+    } catch (e) {
+        console.error("Error updating book:", e);
+        return { success: false, error: 'Failed to update book. Please try again.' };
+    }
+}
+
+// Past conversations about the book are kept; history shows them as "Deleted book"
+export const deleteBook = async (bookId: string): Promise<BookMutationResult> => {
+    try {
+        const { userId, book } = await findOwnBook(bookId);
+        if (!userId) {
+            return { success: false, error: 'Please sign in to delete books.' };
+        }
+        if (!book) {
+            return { success: false, error: 'Book not found.' };
+        }
+
+        await BookSegment.deleteMany({ bookId: book._id });
+        await Book.deleteOne({ _id: book._id });
+        await deleteBlobs([book.fileURL, book.coverURL]);
+
+        revalidatePath('/');
+        revalidatePath('/history');
+
+        return { success: true };
+    } catch (e) {
+        console.error("Error deleting book:", e);
+        return { success: false, error: 'Failed to delete book. Please try again.' };
     }
 }
 

@@ -1,12 +1,14 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { BookOpen, Lock, Mic } from 'lucide-react';
+import { BookOpen, Lock, Mic, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import DeleteBookDialog from '@/components/DeleteBookDialog';
 import { BOOK_HEIGHT } from '@/components/stage/bookSize';
 import { LABEL_DROP, SPACING_X, columnsForWidth, layoutShelf } from '@/components/shelf/layout';
 import type { ShelfBook } from '@/components/shelf/layout';
@@ -106,7 +108,7 @@ const Bookshelf = ({ books }: { books: ShelfBook[] }) => {
             </div>
 
             <div className="shelf-panel">
-                <div className="min-w-0">
+                <div className="min-w-0 sm:flex-1">
                     <p className="shelf-panel-title">
                         {selected.title}
                         {selected.isPublic === false && (
@@ -136,6 +138,36 @@ const Bookshelf = ({ books }: { books: ShelfBook[] }) => {
                         View Book
                     </button>
                 </div>
+                {/* Sits beside the title on phones and after the main actions on wider screens */}
+                {selected.isOwner && (
+                    <div className="shelf-panel-owner">
+                        <Link
+                            href={`/books/${selected.slug}/edit`}
+                            className="shelf-btn-secondary shelf-btn-icon"
+                            aria-label={`Edit ${selected.title}`}
+                            title="Edit book"
+                        >
+                            <Pencil className="size-4" aria-hidden="true" />
+                        </Link>
+                        <DeleteBookDialog
+                            bookId={selected.id}
+                            title={selected.title}
+                            onDeleted={() => {
+                                setSelectedId(null);
+                                router.refresh();
+                            }}
+                        >
+                            <button
+                                type="button"
+                                className="shelf-btn-secondary shelf-btn-icon shelf-btn-danger"
+                                aria-label={`Delete ${selected.title}`}
+                                title="Delete book"
+                            >
+                                <Trash2 className="size-4" aria-hidden="true" />
+                            </button>
+                        </DeleteBookDialog>
+                    </div>
+                )}
             </div>
 
             {/* The canvas is not reachable by keyboard or screen reader, so list the books as plain buttons too */}
