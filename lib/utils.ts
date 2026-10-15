@@ -97,6 +97,10 @@ export const getHinglishVoice = (persona?: string) => {
   return voiceCategories.male.includes(key) ? voiceOptions.sagar : voiceOptions.naina;
 };
 
+// Gender of a voice by its ID, so the assistant can use matching Hindi verb forms ("बताता" vs "बताती")
+export const getVoiceGender = (voiceId: string): 'male' | 'female' =>
+  voiceCategories.male.some((key) => voiceOptions[key as keyof typeof voiceOptions].id === voiceId) ? 'male' : 'female';
+
 // Format duration in seconds to MM:SS format
 export const formatDuration = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
