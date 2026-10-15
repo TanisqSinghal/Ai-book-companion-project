@@ -41,11 +41,22 @@ const isBlobUrl = (url?: string) => {
 };
 
 // Removing the stored files is best effort: the book itself is already gone or updated
-const deleteBlobs = async (urls: (string | undefined)[]) => {
-    const blobUrls = urls.filter((url): url is string => isBlobUrl(url));
-    if (blobUrls.length === 0) return;
+// A file another book still points to is never deleted: edits accept any blob URL as a cover,
+// so without this check a user could point their cover at someone else's file and then remove it
+const deleteBlobs = async (urls: (string | undefined)[], bookId: unknown) => {
+    const candidates = urls.filter((url): url is string => isBlobUrl(url));
+    if (candidates.length === 0) return;
 
     try {
+        const booksUsingFiles = await Book.find({
+            _id: { $ne: bookId },
+            $or: [{ fileURL: { $in: candidates } }, { coverURL: { $in: candidates } }],
+        }).select('fileURL coverURL').lean<{ fileURL?: string; coverURL?: string }[]>();
+        const inUse = new Set(booksUsingFiles.flatMap(({ fileURL, coverURL }) => [fileURL, coverURL]));
+
+        const blobUrls = candidates.filter((url) => !inUse.has(url));
+        if (blobUrls.length === 0) return;
+
         await del(blobUrls, { token: process.env.VERCEL_BLOB_READ_WRITE_TOKEN });
     } catch (e) {
         console.error("Error deleting book files from blob storage:", e);
@@ -276,7 +287,7 @@ export const updateBook = async (bookId: string, input: UpdateBookInput): Promis
         await book.save();
 
         if (input.coverURL && previousCover !== input.coverURL) {
-            await deleteBlobs([previousCover]);
+            await deleteBlobs([previousCover], book._id);
         }
 
         revalidatePath('/');
@@ -302,7 +313,7 @@ export const deleteBook = async (bookId: string): Promise<BookMutationResult> =>
 
         await BookSegment.deleteMany({ bookId: book._id });
         await Book.deleteOne({ _id: book._id });
-        await deleteBlobs([book.fileURL, book.coverURL]);
+        await deleteBlobs([book.fileURL, book.coverURL], book._id);
 
         revalidatePath('/');
         revalidatePath('/history');
