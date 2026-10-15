@@ -1,5 +1,6 @@
 import {IBookSegment} from "@/types";
-import { Schema, model, models, Document } from "mongoose";
+import { Schema } from "mongoose";
+import { registerModel } from "./registerModel";
 
 const BookSegmentSchema = new Schema<IBookSegment>({
     clerkId: {type: String, required: true},
@@ -15,6 +16,6 @@ BookSegmentSchema.index({ bookId: 1, pageNumber: 1 });
 
 BookSegmentSchema.index({ bookId: 1, content: "text" });
 
-const BookSegment = models.BookSegment || model<IBookSegment>("BookSegment", BookSegmentSchema);
+const BookSegment = registerModel<IBookSegment>("BookSegment", BookSegmentSchema);
 
 export default BookSegment;

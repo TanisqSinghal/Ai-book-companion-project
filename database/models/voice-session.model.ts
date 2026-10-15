@@ -1,5 +1,6 @@
 import {ISessionMessage, IVoiceSession} from "@/types";
-import { Schema, model, models, Document } from "mongoose";
+import { Schema } from "mongoose";
+import { registerModel } from "./registerModel";
 
 const SessionMessageSchema = new Schema<ISessionMessage>({
     role: {type: String, enum: ["user", "assistant"], required: true},
@@ -20,6 +21,6 @@ const VoiceSessionSchema = new Schema<IVoiceSession>({
 VoiceSessionSchema.index({clerkId: 1, billingPeriodStart: 1});
 VoiceSessionSchema.index({clerkId: 1, startedAt: -1});
 
-const VoiceSession = models.VoiceSession || model<IVoiceSession>("VoiceSession", VoiceSessionSchema);
+const VoiceSession = registerModel<IVoiceSession>("VoiceSession", VoiceSessionSchema);
 
 export default VoiceSession;

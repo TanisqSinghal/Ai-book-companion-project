@@ -1,5 +1,6 @@
 import {IBook} from "@/types";
-import { Schema, model, models, Document } from "mongoose";
+import { Schema } from "mongoose";
+import { registerModel } from "./registerModel";
 
 
 const BookSchema = new Schema<IBook>({
@@ -18,6 +19,6 @@ const BookSchema = new Schema<IBook>({
     totalSegments: {type: Number, default: 0},
 }, {timestamps: true});
 
-const Book = models.Book || model<IBook>("Book", BookSchema);
+const Book = registerModel<IBook>("Book", BookSchema);
 
 export default Book;
