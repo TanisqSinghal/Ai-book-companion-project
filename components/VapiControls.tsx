@@ -1,9 +1,10 @@
 'use client';
 
-import { Bot, Mic, PhoneOff, User } from "lucide-react";
+import { Bot, Mic, MicOff, PhoneOff, User } from "lucide-react";
 import dynamic from "next/dynamic";
 import useVapi, { VapiLanguage } from "@/hooks/useVapi";
 import useMicLevel from "@/hooks/useMicLevel";
+import { MIC_PROBLEM_TEXT } from "@/hooks/useMicrophoneAccess";
 import { IS_HINGLISH_AVAILABLE } from "@/lib/constants";
 import { getHinglishVoice, getVoice } from "@/lib/utils";
 import { detectMood } from "@/lib/mood";
@@ -59,9 +60,25 @@ const VapiControls = ({ book }: { book: IBook }) => {
         stop,
         didHitSessionLimit,
         limitError,
+        micProblem,
     } = useVapi(book, language);
 
     const micLevelRef = useMicLevel(isActive);
+
+    // After a failed start, bring the fix-it steps into view (the stage fills most of a phone screen).
+    // A blocked mic noticed on page load shows the steps too, but doesn't scroll the page.
+    const [micHelp, setMicHelp] = useState<HTMLDivElement | null>(null);
+    const [startAttempts, setStartAttempts] = useState(0);
+    useEffect(() => {
+        if (micProblem && startAttempts > 0) {
+            micHelp?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }, [micProblem, micHelp, startAttempts]);
+
+    const handleStart = () => {
+        setStartAttempts((count) => count + 1);
+        start();
+    };
 
     useEffect(() => {
         if (didHitSessionLimit) {
@@ -77,7 +94,11 @@ const VapiControls = ({ book }: { book: IBook }) => {
     const aiCaption =
         currentMessage ||
         lastAssistantMessage ||
-        (status === 'idle' ? `Tap the mic and let's talk about ${book.title}.` : 'One moment…');
+        (status !== 'idle'
+            ? 'One moment…'
+            : micProblem
+                ? MIC_PROBLEM_TEXT[micProblem].caption
+                : `Tap the mic and let's talk about ${book.title}.`);
     const userCaption = currentUserMessage || lastUserMessage;
 
     // The robot shows the tone of its own words; the reader reacts to them, or shows their own while talking
@@ -172,7 +193,7 @@ const VapiControls = ({ book }: { book: IBook }) => {
                             <div className="relative">
                                 {isActive && <span className="stage-mic-ring" aria-hidden="true" />}
                                 <button
-                                    onClick={isActive ? stop : start}
+                                    onClick={isActive ? stop : handleStart}
                                     disabled={status === 'connecting'}
                                     type="button"
                                     className={`stage-mic-btn ${isActive ? 'stage-mic-btn-active' : 'stage-mic-btn-inactive'}`}
@@ -182,7 +203,7 @@ const VapiControls = ({ book }: { book: IBook }) => {
                                 </button>
                             </div>
                             <p className="stage-mic-hint">
-                                {status === 'connecting' ? 'Connecting…' : isActive ? 'Tap to end' : 'Tap to talk'}
+                                {status === 'connecting' ? 'Connecting…' : isActive ? 'Tap to end' : micProblem ? 'Tap to retry' : 'Tap to talk'}
                             </p>
                         </div>
 
@@ -196,6 +217,20 @@ const VapiControls = ({ book }: { book: IBook }) => {
                     </div>
                 </div>
             </section>
+
+            {micProblem && !isActive && (
+                <div ref={setMicHelp} className="mic-help" role="alert">
+                    <MicOff className="mic-help-icon" aria-hidden="true" />
+                    <div className="min-w-0">
+                        <p className="mic-help-title">{MIC_PROBLEM_TEXT[micProblem].title}</p>
+                        <ol className="mic-help-steps">
+                            {MIC_PROBLEM_TEXT[micProblem].steps.map((step) => (
+                                <li key={step}>{step}</li>
+                            ))}
+                        </ol>
+                    </div>
+                </div>
+            )}
 
             {limitError && (
                 <div className="warning-banner" role="alert">

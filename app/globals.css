@@ -427,6 +427,19 @@
   .warning-banner-text {
     @apply text-[var(--text-primary)] font-medium;
   }
+  /* Steps to fix the microphone, under the conversation stage */
+  .mic-help {
+    @apply w-full flex items-start gap-3 rounded-xl border border-[var(--accent-warm)] bg-[var(--accent-light)] p-4 scroll-mt-24;
+  }
+  .mic-help-icon {
+    @apply mt-0.5 size-5 shrink-0 text-[var(--accent-warm)];
+  }
+  .mic-help-title {
+    @apply font-semibold text-[var(--text-primary)];
+  }
+  .mic-help-steps {
+    @apply mt-2 list-decimal space-y-1 pl-5 text-sm leading-6 text-[var(--text-secondary)];
+  }
 
   /* ===========================================
      LAYOUT CONTAINERS

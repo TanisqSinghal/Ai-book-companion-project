@@ -9,6 +9,7 @@ import { getHinglishVoice, getVoice, getVoiceGender } from '@/lib/utils';
 import { IBook, Messages } from '@/types';
 import { startVoiceSession, endVoiceSession, saveSessionMessage } from '@/lib/actions/session.actions';
 import { useSubscriptionPlan } from '@/hooks/useSubscriptionPlan';
+import { useMicrophoneAccess } from '@/hooks/useMicrophoneAccess';
 
 export function useLatestRef<T>(value: T) {
     const ref = useRef(value);
@@ -83,6 +84,7 @@ export type CallStatus = 'idle' | 'connecting' | 'starting' | 'listening' | 'thi
 export function useVapi(book: IBook, language: VapiLanguage = 'english') {
     const { userId } = useAuth();
     const { limits } = useSubscriptionPlan();
+    const { problem: micProblem, ensureAccess: ensureMicAccess } = useMicrophoneAccess();
 
     const [status, setStatus] = useState<CallStatus>('idle');
     const [messages, setMessages] = useState<Messages[]>([]);
@@ -329,6 +331,12 @@ export function useVapi(book: IBook, language: VapiLanguage = 'english') {
             const configurationError = getConfigurationError(language);
             if (configurationError) throw new Error(configurationError);
 
+            // Check the microphone first: creating the session record below counts against the monthly limit
+            if (!(await ensureMicAccess())) {
+                setStatus('idle');
+                return;
+            }
+
             // Check session limits and create session record
             const result = await startVoiceSession(userId, book._id);
 
@@ -381,7 +389,7 @@ export function useVapi(book: IBook, language: VapiLanguage = 'english') {
             // Keep the specific reason from 'call-start-failed' if Vapi already reported one
             setLimitError((current) => current ?? 'Failed to start voice session. Please try again.');
         }
-    }, [book._id, book.title, book.author, limits.maxSessionMinutes, voice, userId, language]);
+    }, [book._id, book.title, book.author, limits.maxSessionMinutes, voice, userId, language, ensureMicAccess]);
 
     const stop = useCallback(() => {
         isStoppingRef.current = true;
@@ -418,6 +426,7 @@ export function useVapi(book: IBook, language: VapiLanguage = 'english') {
         limitError,
         didHitSessionLimit,
         clearError,
+        micProblem,
     };
 }
 
