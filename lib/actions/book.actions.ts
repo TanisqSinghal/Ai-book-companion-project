@@ -1,7 +1,7 @@
 'use server'
 
 import { connectToDatabase } from "@/database/mongoose";
-import { BookMutationResult, CreateBook, CreateBookResult, TextSegment, UpdateBookInput } from "@/types";
+import { BookMutationResult, CreateBook, CreateBookResult, DuplicateReason, IBook, TextSegment, UpdateBookInput } from "@/types";
 import { escapeRegex, generateSlug, serializeData } from "@/lib/utils";
 import { BookDetailsSchema } from "@/lib/zod";
 import Book from "@/database/models/book.model";
@@ -23,6 +23,29 @@ const ownSlugFilter = (clerkId: string, title: string) => ({
     clerkId,
     slug: { $regex: `^${escapeRegex(generateSlug(title))}(-[a-f0-9]{6})?$` },
 });
+
+// Same author regardless of case, spacing or punctuation ("J.K. Rowling" and "j k rowling")
+const normalizeAuthor = (author: string) => author.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+
+const isFileHash = (value?: string): value is string => /^[a-f0-9]{64}$/.test(value ?? '');
+
+// The user's copy of this book, if they already uploaded it: the same PDF file,
+// or the same title by the same author (two different books may share a title)
+const findOwnDuplicate = async (
+    clerkId: string,
+    title: string,
+    author: string,
+    fileHash?: string,
+): Promise<{ book: IBook; reason: DuplicateReason } | null> => {
+    if (isFileHash(fileHash)) {
+        const sameFile = await Book.findOne({ clerkId, fileHash }).lean<IBook>();
+        if (sameFile) return { book: sameFile, reason: 'file' };
+    }
+
+    const sameTitle = await Book.find(ownSlugFilter(clerkId, title)).lean<IBook[]>();
+    const sameTitleAndAuthor = sameTitle.find((book) => normalizeAuthor(book.author) === normalizeAuthor(author));
+    return sameTitleAndAuthor ? { book: sameTitleAndAuthor, reason: 'title' } : null;
+};
 
 // Slugs are unique site-wide, so a title another book already has gets a short suffix
 const availableSlug = async (title: string, excludeId?: unknown) => {
@@ -146,6 +169,37 @@ export const checkBookExists = async (title: string) => {
     }
 }
 
+// Run before uploading anything, so a duplicate leaves no stray files in storage
+export const checkDuplicateBook = async (title: string, author: string, fileHash?: string) => {
+    try {
+        const { userId } = await auth();
+        if (!userId) {
+            return { exists: false };
+        }
+
+        await connectToDatabase();
+
+        const duplicate = await findOwnDuplicate(userId, title, author, fileHash);
+
+        if (duplicate) {
+            return {
+                exists: true,
+                book: serializeData(duplicate.book),
+                reason: duplicate.reason,
+            }
+        }
+        return {
+            exists: false,
+        }
+    } catch (e) {
+        console.error("Error checking for a duplicate book:", e);
+        return {
+            exists: false,
+            error: e
+        }
+    }
+}
+
 export const createBook = async (data: CreateBook): Promise<CreateBookResult> => {
     try {
         await connectToDatabase();
@@ -160,13 +214,14 @@ export const createBook = async (data: CreateBook): Promise<CreateBookResult> =>
             }
         }
 
-        const existingBook = await Book.findOne(ownSlugFilter(userId, data.title)).lean();
+        const duplicate = await findOwnDuplicate(userId, data.title, data.author, data.fileHash);
 
-        if(existingBook) {
+        if(duplicate) {
             return {
                 success: true,
-                data: serializeData(existingBook),
+                data: serializeData(duplicate.book),
                 alreadyExists: true,
+                duplicateReason: duplicate.reason,
             }
         }
 
@@ -184,6 +239,7 @@ export const createBook = async (data: CreateBook): Promise<CreateBookResult> =>
 
         const book = await Book.create({
             ...data,
+            fileHash: isFileHash(data.fileHash) ? data.fileHash : undefined,
             isPublic: Boolean(data.isPublic),
             clerkId: userId,
             slug,

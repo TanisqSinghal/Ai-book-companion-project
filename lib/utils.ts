@@ -108,6 +108,12 @@ export const formatDuration = (seconds: number): string => {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
+// SHA-256 fingerprint of a file, used to spot the same PDF uploaded again under another title
+export const hashFile = async (file: Blob): Promise<string> => {
+  const digest = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
+};
+
 export async function parsePDFFile(file: File) {
   try {
     const pdfjsLib = await import('pdfjs-dist');

@@ -16,9 +16,10 @@ import LoadingOverlay from './LoadingOverlay';
 import VisibilitySelector from './VisibilitySelector';
 import {useAuth} from "@clerk/nextjs";
 import { toast } from 'sonner';
-import {checkBookExists, createBook, saveBookSegments} from "@/lib/actions/book.actions";
+import {checkDuplicateBook, createBook, saveBookSegments} from "@/lib/actions/book.actions";
 import {useRouter} from "next/navigation";
-import {parsePDFFile} from "@/lib/utils";
+import {hashFile, parsePDFFile} from "@/lib/utils";
+import { DuplicateReason } from '@/types';
 import {upload} from "@vercel/blob/client";
 
 const UploadForm = () => {
@@ -43,6 +44,16 @@ const UploadForm = () => {
         },
     });
 
+    // The form stays filled in, so a book that only shares a title can be corrected and resubmitted
+    const showAlreadyUploaded = (slug: string, reason?: DuplicateReason) => {
+        toast.info("You already have this book", {
+            description: reason === 'file'
+                ? "This PDF is already in your library."
+                : "A book with this title and author is already in your library.",
+            action: { label: "Open it", onClick: () => router.push(`/books/${slug}`) },
+        });
+    };
+
     const onSubmit = async (data: BookUploadFormValues) => {
         if (!isLoaded) {
             toast.info("Checking your sign-in status. Please try again in a moment.");
@@ -60,17 +71,17 @@ const UploadForm = () => {
         // PostHog -> Track Book Uploads...
 
         try {
-            const existsCheck = await checkBookExists(data.title);
+            const pdfFile = data.pdfFile;
+            const fileHash = await hashFile(pdfFile);
+
+            const existsCheck = await checkDuplicateBook(data.title, data.author, fileHash);
 
             if(existsCheck.exists && existsCheck.book) {
-                toast.info("Book with same title already exists.");
-                form.reset()
-                router.push(`/books/${existsCheck.book.slug}`)
+                showAlreadyUploaded(existsCheck.book.slug, existsCheck.reason);
                 return;
             }
 
             const fileTitle = data.title.replace(/\s+/g, '-').toLowerCase();
-            const pdfFile = data.pdfFile;
 
             const parsedPDF = await parsePDFFile(pdfFile);
 
@@ -117,6 +128,7 @@ const UploadForm = () => {
                 fileBlobKey: uploadedPdfBlob.pathname,
                 coverURL: coverUrl,
                 fileSize: pdfFile.size,
+                fileHash,
             });
 
             if(!book.success) {
@@ -132,9 +144,7 @@ const UploadForm = () => {
                     toast.error("Failed to resolve existing book details.");
                     return;
                 }
-                toast.info("Book with same title already exists.");
-                form.reset()
-                router.push(`/books/${book.data.slug}`)
+                showAlreadyUploaded(book.data.slug, book.duplicateReason);
                 return;
             }
 

@@ -16,8 +16,13 @@ const BookSchema = new Schema<IBook>({
     coverURL: {type: String},
     coverBlobKey: {type: String},
     fileSize: {type: Number, required: true},
+    // SHA-256 of the PDF, so the same file can't be uploaded twice under another title.
+    // Books saved before this existed have none and are matched by title and author only
+    fileHash: {type: String},
     totalSegments: {type: Number, default: 0},
 }, {timestamps: true});
+
+BookSchema.index({ clerkId: 1, fileHash: 1 });
 
 const Book = registerModel<IBook>("Book", BookSchema);
 

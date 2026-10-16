@@ -23,6 +23,7 @@ export interface IBook extends Document {
     coverURL: string;
     coverBlobKey?: string;
     fileSize: number;
+    fileHash?: string;
     totalSegments: number;
     createdAt: Date;
     updatedAt: Date;
@@ -94,6 +95,7 @@ export interface CreateBook {
     coverURL?: string;
     coverBlobKey?: string;
     fileSize: number;
+    fileHash?: string;
 }
 
 export interface TextSegment {
@@ -164,10 +166,14 @@ export interface StartSessionResult {
     isBillingError?: boolean;
 }
 
+// Why an upload counts as a book the user already has: the same PDF, or the same title by the same author
+export type DuplicateReason = 'file' | 'title';
+
 export interface CreateBookResult {
     success: boolean;
     data?: IBook;
     alreadyExists?: boolean;
+    duplicateReason?: DuplicateReason;
     error?: string | unknown;
     isBillingError?: boolean;
 }
